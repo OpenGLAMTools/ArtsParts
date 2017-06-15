@@ -34,6 +34,7 @@ type Artwork struct {
 	Description string
 }
 
+// User of the artsparts page.
 type User struct {
 	Twitter string
 	Email   string

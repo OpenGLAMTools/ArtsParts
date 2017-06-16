@@ -10,7 +10,7 @@ import (
 var conf Conf
 
 func init() {
-	conf = loadConf()
+	conf, _ = loadConf()
 }
 
 func main() {

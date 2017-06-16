@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"os"
@@ -33,5 +34,10 @@ func addAuthRoutes(r *mux.Router) *mux.Router {
 }
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
-
+	user, err := gothic.CompleteUserAuth(w, r)
+	if err != nil {
+		fmt.Fprintln(w, r)
+		return
+	}
+	fmt.Fprintf(w, "%#v", user)
 }

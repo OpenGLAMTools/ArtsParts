@@ -1,6 +1,11 @@
 package main
 
-import "github.com/gorilla/mux"
+import (
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
 
 var conf Conf
 
@@ -9,6 +14,9 @@ func init() {
 }
 
 func main() {
+	r := makeRoutes()
+	r = addAuthRoutes(r)
+	log.Fatal(http.ListenAndServe(conf.ServerPort, r))
 
 }
 

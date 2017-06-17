@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -14,10 +15,12 @@ import (
 )
 
 func init() {
-	store := sessions.NewFilesystemStore(os.TempDir(), []byte("goth-example"))
-
+	conf, err := loadConf(confFile)
+	if err != nil {
+		log.Fatal("Error loading confFile: ", confFile)
+	}
+	store := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.SessionSecret))
 	store.MaxLength(math.MaxInt64)
-
 	gothic.Store = store
 	goth.UseProviders(
 		twitter.New(
@@ -28,12 +31,21 @@ func init() {
 }
 
 func addAuthRoutes(r *mux.Router) *mux.Router {
-	s := r.PathPrefix("/auth").Subrouter()
-	s.HandleFunc("/twitter/callback", callbackHandler).Methods("GET")
+	s := r.PathPrefix("/auth/{provider}").Subrouter()
+	s.HandleFunc("/callback", authCallbackHandler).Methods("GET")
+	s.HandleFunc("", authHandler).Methods("GET")
 	return r
 }
 
-func callbackHandler(w http.ResponseWriter, r *http.Request) {
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
+		fmt.Fprintf(w, "UserFound\n\n%#v", gothUser)
+	} else {
+		gothic.BeginAuthHandler(w, r)
+	}
+}
+
+func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
 		fmt.Fprintln(w, r)

@@ -15,19 +15,23 @@ import (
 )
 
 func init() {
-	conf, err := loadConf(confFile)
-	if err != nil {
-		log.Fatal("Error loading confFile: ", confFile)
-	}
 	store := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.SessionSecret))
 	store.MaxLength(math.MaxInt64)
 	gothic.Store = store
 	goth.UseProviders(
 		twitter.New(
-			conf.TwitterKey,
-			conf.TwitterSecret,
+			getenv("TWITTER_KEY"),
+			getenv("TWITTER_SECRET"),
 			"http://localhost:3000/auth/twitter/callback"),
 	)
+}
+
+func getenv(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("No Env value set for %s", key)
+	}
+	return val
 }
 
 func addAuthRoutes(r *mux.Router) *mux.Router {

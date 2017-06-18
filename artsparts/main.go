@@ -10,10 +10,6 @@ import (
 var confFile = ".conf.yml"
 
 func main() {
-	conf, err := loadConf(confFile)
-	if err != nil {
-		log.Fatal("Error loading conf", err)
-	}
 	r := makeRoutes()
 	r = addAuthRoutes(r)
 	log.Fatal(http.ListenAndServe(conf.ServerPort, r))

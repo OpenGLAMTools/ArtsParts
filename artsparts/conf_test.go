@@ -15,8 +15,6 @@ func TestParseConf(t *testing.T) {
 	exp := Conf{
 		":3000",
 		"secret_and_long_string",
-		"twkey",
-		"twsecret",
 	}
 	if !reflect.DeepEqual(conf, exp) {
 		t.Error("Conf parsing is not correct", exp, conf)

@@ -9,6 +9,8 @@ import (
 )
 
 func TestAddAuthRoutes(t *testing.T) {
+	conf, _ := loadConf("default.conf.yml")
+	initAuth(conf)
 	router := mux.NewRouter()
 	router = addAuthRoutes(router)
 	ts := httptest.NewServer(router)

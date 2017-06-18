@@ -14,7 +14,7 @@ import (
 	"github.com/markbates/goth/providers/twitter"
 )
 
-func init() {
+func initAuth(conf Conf) {
 	store := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.SessionSecret))
 	store.MaxLength(math.MaxInt64)
 	gothic.Store = store

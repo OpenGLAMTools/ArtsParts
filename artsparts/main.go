@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,8 +16,13 @@ func main() {
 		log.Fatal("Can not load conf: ", confFile, err)
 	}
 	initAuth(conf)
+	initTwitter()
 	r := makeRoutes()
 	r = addAuthRoutes(r)
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "This is artsParts")
+	})
+	r.HandleFunc("/tweet", postTweetHandler)
 	log.Fatal(http.ListenAndServe(conf.ServerPort, r))
 
 }

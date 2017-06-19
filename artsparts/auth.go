@@ -14,6 +14,9 @@ import (
 	"github.com/markbates/goth/providers/twitter"
 )
 
+var sessionName = "ap-user-session"
+var store *sessions.FilesystemStore
+
 func initAuth(conf Conf) {
 	store := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.SessionSecret))
 	store.MaxLength(math.MaxInt64)
@@ -43,17 +46,39 @@ func addAuthRoutes(r *mux.Router) *mux.Router {
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-		fmt.Fprintf(w, "UserFound\n\n%#v", gothUser)
+		session, err := gothic.Store.Get(r, sessionName)
+		if err != nil {
+			log.Println("Error when session get():", err)
+		}
+		//session.Values["gothUser"] = gothUser
+		session.Values["userid"] = gothUser.UserID
+		session.Values["access_token"] = gothUser.AccessToken
+		session.Values["access_token_secret"] = gothUser.AccessTokenSecret
+		err = session.Save(r, w)
+		if err != nil {
+			log.Println("Error on session save: ", err)
+		}
+		fmt.Fprintf(w, "%#v", gothUser)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := gothic.CompleteUserAuth(w, r)
+	gothUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		fmt.Fprintln(w, r)
+		log.Println("Error completing auth: ", err)
 		return
 	}
-	fmt.Fprintf(w, "%#v", user)
+	session, err := gothic.Store.Get(r, sessionName)
+	if err != nil {
+		log.Println("Error when calling session get():", err)
+	}
+	session.Values["gothUser"] = gothUser
+	err = session.Save(r, w)
+	if err != nil {
+		log.Println("Error when saving session: ", err)
+	}
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

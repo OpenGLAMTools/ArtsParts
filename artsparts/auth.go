@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"net/http"
@@ -13,6 +12,9 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/twitter"
 )
+
+var sessionName = "ap-user-session"
+var store *sessions.FilesystemStore
 
 func initAuth(conf Conf) {
 	store := sessions.NewFilesystemStore(os.TempDir(), []byte(conf.SessionSecret))
@@ -43,17 +45,29 @@ func addAuthRoutes(r *mux.Router) *mux.Router {
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-		fmt.Fprintf(w, "UserFound\n\n%#v", gothUser)
+		session, err := store.Get(r, sessionName)
+		if err != nil {
+			log.Println("Error when session get():", err)
+		}
+		session.Values["gothUser"] = gothUser
+		session.Save(r, w)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
+	// TODO redirect
 }
 
 func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := gothic.CompleteUserAuth(w, r)
+	gothUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		fmt.Fprintln(w, r)
+		log.Println("Error completing auth: ", err)
 		return
 	}
-	fmt.Fprintf(w, "%#v", user)
+	session, err := store.Get(r, sessionName)
+	if err != nil {
+		log.Println("Error when calling session get():", err)
+	}
+	session.Values["gothUser"] = gothUser
+	session.Save(r, w)
+	// TODO redirect
 }

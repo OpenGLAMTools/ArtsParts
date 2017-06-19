@@ -9,6 +9,7 @@ import (
 type Conf struct {
 	ServerPort    string `yaml:"server_port,omitempty"`
 	SessionSecret string `yaml:"session_secret,omitempty"`
+	LogLevel      uint32 `yaml:"log_level"`
 }
 
 func loadConf(f string) (Conf, error) {

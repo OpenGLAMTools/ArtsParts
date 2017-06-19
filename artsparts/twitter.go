@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"net/url"
 
@@ -17,7 +16,9 @@ func initTwitter() {
 }
 func postTweetHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := gothic.Store.Get(r, sessionName)
-	log.Println("Error when calling session get():", err)
+	if err != nil {
+		log.Warningln("Error when calling session get():", err)
+	}
 	accesToken := session.Values["access_token"].(string)
 	accesTokenSecret := session.Values["access_token_secret"].(string)
 	twitterAPI := anaconda.NewTwitterApi(
@@ -26,7 +27,7 @@ func postTweetHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	err = postTweet("Text...", "../test/test.jpg", twitterAPI)
 	if err != nil {
-		log.Println("Error when tweeting: ", err)
+		log.Warningln("Error when tweeting: ", err)
 	}
 }
 func postTweet(text, imagePath string, twitterAPI *anaconda.TwitterApi) error {

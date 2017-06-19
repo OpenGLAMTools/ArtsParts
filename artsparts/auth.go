@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"math"
 	"net/http"
 	"os"
@@ -32,7 +30,7 @@ func initAuth(conf Conf) {
 func getenv(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
-		log.Fatalf("No Env value set for %s", key)
+		log.Errorf("No Env value set for %s", key)
 	}
 	return val
 }
@@ -48,7 +46,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
 		session, err := gothic.Store.Get(r, sessionName)
 		if err != nil {
-			log.Println("Error when session get():", err)
+			log.Warningln("Error when session get():", err)
 		}
 		//session.Values["gothUser"] = gothUser
 		session.Values["userid"] = gothUser.UserID
@@ -56,9 +54,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["access_token_secret"] = gothUser.AccessTokenSecret
 		err = session.Save(r, w)
 		if err != nil {
-			log.Println("Error on session save: ", err)
+			log.Warningln("Error on session save: ", err)
 		}
-		fmt.Fprintf(w, "%#v", gothUser)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
@@ -68,17 +65,17 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	gothUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
-		log.Println("Error completing auth: ", err)
+		log.Warningln("Error completing auth: ", err)
 		return
 	}
 	session, err := gothic.Store.Get(r, sessionName)
 	if err != nil {
-		log.Println("Error when calling session get():", err)
+		log.Warningln("Error when calling session get():", err)
 	}
 	session.Values["gothUser"] = gothUser
 	err = session.Save(r, w)
 	if err != nil {
-		log.Println("Error when saving session: ", err)
+		log.Warningln("Error when saving session: ", err)
 	}
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

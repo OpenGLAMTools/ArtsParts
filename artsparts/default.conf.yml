@@ -1,2 +1,3 @@
 server_port: :3000
 session_secret: secret_and_long_string
+log_level: 5

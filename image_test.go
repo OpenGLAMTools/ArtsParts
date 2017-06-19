@@ -11,7 +11,7 @@ func TestImageToBaseString(t *testing.T) {
 	if err != nil {
 		t.Error("Error opening test image")
 	}
-	s, err := imageToBaseString(img)
+	s, err := ImageToBaseString(img)
 	if err != nil {
 		t.Error("imageToBaseString returns an error")
 	}

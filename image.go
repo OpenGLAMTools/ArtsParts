@@ -7,7 +7,7 @@ import (
 	"image/jpeg"
 )
 
-func imageToBaseString(img image.Image) (string, error) {
+func ImageToBaseString(img image.Image) (string, error) {
 	buf := &bytes.Buffer{}
 	err := jpeg.Encode(buf, img, nil)
 	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())

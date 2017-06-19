@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"net/http"
@@ -45,16 +46,23 @@ func addAuthRoutes(r *mux.Router) *mux.Router {
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-		session, err := store.Get(r, sessionName)
+		session, err := gothic.Store.Get(r, sessionName)
 		if err != nil {
 			log.Println("Error when session get():", err)
 		}
-		session.Values["gothUser"] = gothUser
-		session.Save(r, w)
+		//session.Values["gothUser"] = gothUser
+		session.Values["userid"] = gothUser.UserID
+		session.Values["access_token"] = gothUser.AccessToken
+		session.Values["access_token_secret"] = gothUser.AccessTokenSecret
+		err = session.Save(r, w)
+		if err != nil {
+			log.Println("Error on session save: ", err)
+		}
+		fmt.Fprintf(w, "%#v", gothUser)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
-	// TODO redirect
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,11 +71,14 @@ func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error completing auth: ", err)
 		return
 	}
-	session, err := store.Get(r, sessionName)
+	session, err := gothic.Store.Get(r, sessionName)
 	if err != nil {
 		log.Println("Error when calling session get():", err)
 	}
 	session.Values["gothUser"] = gothUser
-	session.Save(r, w)
-	// TODO redirect
+	err = session.Save(r, w)
+	if err != nil {
+		log.Println("Error when saving session: ", err)
+	}
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }

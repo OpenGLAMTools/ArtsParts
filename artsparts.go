@@ -11,9 +11,11 @@ package artsparts
 //         ├───pic1
 //         └───pic2
 type Institution struct {
+	ID          string
 	Name        string
 	Description string
 	Collections map[string]*Collection
+	Admins      []string
 }
 
 // Collection represents a group of artworks, which are presented
@@ -34,8 +36,15 @@ type Artwork struct {
 	Description string
 }
 
+type TimelineItem struct {
+	InsitutionName   string
+	CollectionName   string
+	ArtworkName      string
+	ArtworkTimestamp int
+}
+
 // User of the artsparts page.
 type User struct {
-	Twitter string
-	Email   string
+	TwitterID string
+	Email     string
 }

@@ -50,6 +50,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		//session.Values["gothUser"] = gothUser
 		session.Values["userid"] = gothUser.UserID
+		session.Values["twitter"] = gothUser.NickName
 		session.Values["access_token"] = gothUser.AccessToken
 		session.Values["access_token_secret"] = gothUser.AccessTokenSecret
 		err = session.Save(r, w)

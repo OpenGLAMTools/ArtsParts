@@ -6,3 +6,7 @@ body {
 nav {
     padding-right: 5px;
 }
+
+img#image {
+  max-width: 80%;
+}

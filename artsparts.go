@@ -1,5 +1,15 @@
 package artsparts
 
+import (
+	"io/ioutil"
+	"path/filepath"
+
+	"gopkg.in/yaml.v2"
+)
+
+// ConfFileName is the static value for all yaml conf files
+const ConfFileName = "conf.yml"
+
 // Institutions holds the complete logic of the artsparts site.
 // The insitutions are organized over a slice.
 type Institutions []*Institution
@@ -17,23 +27,51 @@ type Institutions []*Institution
 //
 // The ID has to be unique and is always used inside the url.
 type Institution struct {
-	ID          string
-	Name        string
-	Description string
-	Collections map[string]*Collection
-	Admins      []string
+	ID          string                 `json:"id,omitempty" yaml:"id"`
+	Name        string                 `json:"name,omitempty" yaml:"name"`
+	Description string                 `json:"description,omitempty" yaml:"desc"`
+	Collections map[string]*Collection `json:"collections,omitempty" yaml:"-"`
+	Admins      []string               `json:"admins,omitempty" yaml:"admins"`
+}
+
+// NewInstitution takes a filepath and loads the configuration. Then
+// it loads all the collections.
+func NewInstitution(fpath string) (*Institution, error) {
+	inst := &Institution{}
+	confFile := filepath.Join(fpath, ConfFileName)
+	b, err := ioutil.ReadFile(confFile)
+	if err != nil {
+		return nil, err
+	}
+	err = yaml.Unmarshal(b, inst)
+	ls, err := ioutil.ReadDir(fpath)
+	for _, d := range ls {
+		if !d.IsDir() {
+			continue
+		}
+		coll, err := NewCollection(filepath.Join(fpath, d.Name()))
+		if err != nil {
+			return inst, err
+		}
+		inst.Collections[coll.ID] = coll
+	}
+	return inst, nil
 }
 
 // Collection represents a group of artworks, which are presented
 // together. It could be grouped after artist or a specific style.
 // The Order property allows to sort the collections of a institution.
 type Collection struct {
-	ID          string
-	Name        string
-	Description string
-	License     string
-	Order       int
-	Artworks    []*Artwork
+	ID          string     `json:"id,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	Description string     `json:"description,omitempty"`
+	License     string     `json:"license,omitempty"`
+	Order       int        `json:"order,omitempty"`
+	Artworks    []*Artwork `json:"artworks,omitempty"`
+}
+
+func NewCollection(fpath string) (*Collection, error) {
+	return &Collection{}, nil
 }
 
 // Artwork is one element like for example a picture. The picture

@@ -7,10 +7,14 @@ import (
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 )
 
+// Admin is used for managing all admin issues. It also implements
+// the http.Handler interface and is used to serve all the admin
+// pages.
 type Admin struct {
 	institutions artsparts.Institutions
 }
 
+// NewAdmin returns a pointer to a new instance
 func NewAdmin(i artsparts.Institutions) *Admin {
 	return &Admin{
 		institutions: i,

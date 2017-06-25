@@ -8,6 +8,40 @@ import (
 	"testing"
 )
 
+func TestApp_AdminInstitutions(t *testing.T) {
+	app, _ := NewApp(filepath.Join("test"))
+	inst1, _ := app.GetInstitution("inst1")
+	type args struct {
+		twitterName string
+	}
+	tests := []struct {
+		name string
+		a    *App
+		args args
+		want Institutions
+	}{
+		{
+			"find inst1 for user1",
+			app,
+			args{"user1"},
+			Institutions{inst1},
+		},
+		{
+			"find nothing for user3",
+			app,
+			args{"user3"},
+			Institutions{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.a.AdminInstitutions(tt.args.twitterName); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("App.AdminInstitutions() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNewInstitution(t *testing.T) {
 	inst1, err := NewInstitution(filepath.Join("test", "inst1"))
 	if err != nil {
@@ -55,7 +89,7 @@ func TestNewCollection(t *testing.T) {
 }
 
 func TestNewCollectionID(t *testing.T) {
-	coll2, err := NewCollection("test/inst1/coll2")
+	coll2, err := NewCollection(filepath.Join("test", "inst1", "coll2"))
 	// conf file does not have a id definition so the
 	// id should be created from the path
 	if err != nil {
@@ -65,6 +99,50 @@ func TestNewCollectionID(t *testing.T) {
 		t.Errorf("should create an error\n Exp: coll2\nGot: %s", coll2.ID)
 	}
 }
+
+func TestCollection_GetArtwork(t *testing.T) {
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"))
+	type args struct {
+		artwID string
+	}
+	tests := []struct {
+		name  string
+		coll  *Collection
+		args  args
+		want  *Artwork
+		want1 bool
+	}{
+		{
+			"search pic1",
+			coll1,
+			args{"pic1"},
+			coll1.Artworks[0],
+			true,
+		},
+		{
+			"search not existing artwork",
+			coll1,
+			args{"picNotExist"},
+			nil,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := tt.coll.GetArtwork(tt.args.artwID)
+			if got != tt.want {
+				t.Error("Pointers are not the same")
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Collection.GetArtwork() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("Collection.GetArtwork() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
 func TestNewArtworkEnsureConf(t *testing.T) {
 	tmpDir, err := ioutil.TempDir("", "artsparts_test")
 	defer os.RemoveAll(tmpDir)

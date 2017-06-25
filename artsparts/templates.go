@@ -5,4 +5,5 @@ type templateData struct {
 	CSSFiles []string
 	JQuery   bool
 	VueJS    bool
+	User     string
 }

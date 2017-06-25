@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/OpenGLAMTools/ArtsParts/helpers"
+	"github.com/pkg/errors"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,6 +21,76 @@ const DataFileName = "data.json"
 // Institutions holds the complete logic of the artsparts site.
 // The insitutions are organized over a slice.
 type Institutions []*Institution
+
+// App wraps the whole logic for a simple communication from
+// the http handlers.
+type App struct {
+	Institutions Institutions
+}
+
+// NewApp creates a new app by a given filepath
+func NewApp(fpath string) (*App, error) {
+	app := &App{}
+	ls, err := ioutil.ReadDir(fpath)
+	if err != nil {
+		return app, errors.Errorf("%s\nPath:\n%s", err, fpath)
+	}
+	for _, d := range ls {
+		if !d.IsDir() {
+			continue
+		}
+		inst, err := NewInstitution(filepath.Join(fpath, d.Name()))
+		if err != nil {
+			return app, errors.Errorf("newInstitution error: %s\nFolder: %s",
+				err,
+				d.Name(),
+			)
+		}
+		app.Institutions = append(app.Institutions, inst)
+	}
+	return app, nil
+}
+
+// GetInstitution returns the pointer to the given id. Second return
+// parameter gives false, when no entry is found.
+func (a *App) GetInstitution(instID string) (*Institution, bool) {
+	for _, i := range a.Institutions {
+		if i.ID == instID {
+			return i, true
+		}
+	}
+	return nil, false
+}
+
+// GetCollection returns the pointer to the given ids.
+func (a *App) GetCollection(instID, collID string) (*Collection, bool) {
+	i, ok := a.GetInstitution(instID)
+	if !ok {
+		return nil, false
+	}
+	c, ok := i.Collections[collID]
+	return c, ok
+}
+
+// GetArtwork returns the pointer to the given ids.
+func (a *App) GetArtwork(instID, collID, artwID string) (*Artwork, bool) {
+	c, ok := a.GetCollection(instID, collID)
+	if !ok {
+		return nil, false
+	}
+	return c.GetArtwork(artwID)
+}
+
+// AdminInstitutions returns all the intitutions, where the user is admin
+func (a *App) AdminInstitutions(twitterName string) Institutions {
+	ins := []*Institution{}
+	for _, i := range a.Institutions {
+		if helpers.StringInSlice(twitterName, i.Admins) {
+			ins = append(ins, i)
+		}
+	}
+	return ins
+}
 
 // Institution defines a museum or another partner of the site,
 // which offers collections of digital art images.
@@ -120,6 +193,18 @@ func NewCollection(fpath string) (*Collection, error) {
 		coll.Artworks = append(coll.Artworks, artw)
 	}
 	return coll, nil
+}
+
+// GetArtwork searches for an artwork id and returns a pointer to the
+// artwork. If there is not artwork found with the given ID the second
+// return value returns false.
+func (coll *Collection) GetArtwork(artwID string) (*Artwork, bool) {
+	for _, artw := range coll.Artworks {
+		if artw.ID == artwID {
+			return artw, true
+		}
+	}
+	return nil, false
 }
 
 // Artwork is one element like for example a picture. The picture

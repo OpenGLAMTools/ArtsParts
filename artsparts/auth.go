@@ -10,6 +10,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/pkg/errors"
 )
 
 var sessionName = "ap-user-session"
@@ -73,10 +74,26 @@ func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Warningln("Error when calling session get():", err)
 	}
-	session.Values["gothUser"] = gothUser
+	session.Values["userid"] = gothUser.UserID
+	session.Values["twitter"] = gothUser.NickName
+	session.Values["access_token"] = gothUser.AccessToken
+	session.Values["access_token_secret"] = gothUser.AccessTokenSecret
 	err = session.Save(r, w)
 	if err != nil {
 		log.Warningln("Error when saving session: ", err)
 	}
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}
+
+func getSessionValues(r *http.Request) (map[string]string, error) {
+	session, err := gothic.Store.Get(r, sessionName)
+	if err != nil {
+		return nil, errors.Wrap(err, "getSessionValues fails")
+	}
+	vals := make(map[string]string)
+	vals["userid"] = session.Values["userid"].(string)
+	vals["twitter"] = session.Values["twitter"].(string)
+	vals["access_token"] = session.Values["access_token"].(string)
+	vals["access_token_secret"] = session.Values["access_token_secret"].(string)
+	return vals, nil
 }

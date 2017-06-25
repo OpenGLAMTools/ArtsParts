@@ -1,0 +1,27 @@
+# The configuration file can be used for institution and
+# collections. At the moment admins are just defined over
+# the institution.
+
+# id can overwrite the foldername as id
+# type      string
+id: new_id
+
+# name defines the displayed name
+# type string
+name: The name which is displayed
+
+# description is parsed as markdown
+# type      string
+description: A short description about everything
+
+# license text or link of the license
+# type string
+license: MIT Open Source License
+
+# order is a integer for sorting elements with lower number
+# are displayed first
+order: 10
+
+# admins are just supported for intitutions
+# type      array
+admins: [user1,user2]

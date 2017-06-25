@@ -1,7 +1,9 @@
 package artsparts
 
 import (
+	"encoding/json"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v2"
@@ -9,6 +11,9 @@ import (
 
 // ConfFileName is the static value for all yaml conf files
 const ConfFileName = "conf.yml"
+
+// DataFileName defines the filename where data is stored.
+const DataFileName = "data.json"
 
 // Institutions holds the complete logic of the artsparts site.
 // The insitutions are organized over a slice.
@@ -27,11 +32,22 @@ type Institutions []*Institution
 //
 // The ID has to be unique and is always used inside the url.
 type Institution struct {
-	ID          string                 `json:"id,omitempty" yaml:"id"`
-	Name        string                 `json:"name,omitempty" yaml:"name"`
-	Description string                 `json:"description,omitempty" yaml:"desc"`
-	Collections map[string]*Collection `json:"collections,omitempty" yaml:"-"`
-	Admins      []string               `json:"admins,omitempty" yaml:"admins"`
+	ID          string                 `json:"id" yaml:"id"`
+	Name        string                 `json:"name" yaml:"name"`
+	Description string                 `json:"description" yaml:"description"`
+	License     string                 `json:"license" yaml:"license"`
+	Order       int                    `json:"order" yaml:"order"`
+	Collections map[string]*Collection `json:"collections" yaml:"-"`
+	Admins      []string               `json:"admins" yaml:"admins"`
+}
+
+func loadConf(confFile string, out interface{}) error {
+	b, err := ioutil.ReadFile(confFile)
+	if err != nil {
+		return err
+	}
+	err = yaml.Unmarshal(b, out)
+	return nil
 }
 
 // NewInstitution takes a filepath and loads the configuration. Then
@@ -39,12 +55,17 @@ type Institution struct {
 func NewInstitution(fpath string) (*Institution, error) {
 	inst := &Institution{}
 	confFile := filepath.Join(fpath, ConfFileName)
-	b, err := ioutil.ReadFile(confFile)
-	if err != nil {
-		return nil, err
+	if err := loadConf(confFile, inst); err != nil {
+		return inst, err
 	}
-	err = yaml.Unmarshal(b, inst)
+	if inst.ID == "" {
+		inst.ID = filepath.Base(fpath)
+	}
+	inst.Collections = make(map[string]*Collection)
 	ls, err := ioutil.ReadDir(fpath)
+	if err != nil {
+		return inst, err
+	}
 	for _, d := range ls {
 		if !d.IsDir() {
 			continue
@@ -62,26 +83,101 @@ func NewInstitution(fpath string) (*Institution, error) {
 // together. It could be grouped after artist or a specific style.
 // The Order property allows to sort the collections of a institution.
 type Collection struct {
-	ID          string     `json:"id,omitempty"`
-	Name        string     `json:"name,omitempty"`
-	Description string     `json:"description,omitempty"`
-	License     string     `json:"license,omitempty"`
-	Order       int        `json:"order,omitempty"`
-	Artworks    []*Artwork `json:"artworks,omitempty"`
+	ID          string     `json:"id" yaml:"id"`
+	Name        string     `json:"name" yaml:"name"`
+	Description string     `json:"description" yaml:"description"`
+	License     string     `json:"license" yaml:"license"`
+	Order       int        `json:"order" yaml:"order"`
+	Artworks    []*Artwork `json:"artworks" yaml:"-"`
 }
 
+// NewCollection loads the configuration and creates a pointer to the
+// new collection
 func NewCollection(fpath string) (*Collection, error) {
-	return &Collection{}, nil
+	coll := &Collection{}
+	confFile := filepath.Join(fpath, ConfFileName)
+	if err := loadConf(confFile, coll); err != nil {
+		return coll, err
+	}
+	if coll.ID == "" {
+		coll.ID = filepath.Base(fpath)
+	}
+	if coll.Name == "" {
+		coll.Name = coll.ID
+	}
+	ls, err := ioutil.ReadDir(fpath)
+	if err != nil {
+		return coll, err
+	}
+	for _, d := range ls {
+		if !d.IsDir() {
+			continue
+		}
+		artw, err := NewArtwork(filepath.Join(fpath, d.Name()))
+		if err != nil {
+			return coll, err
+		}
+		coll.Artworks = append(coll.Artworks, artw)
+	}
+	return coll, nil
 }
 
 // Artwork is one element like for example a picture. The picture
 // should be placed inside a folder. One artwork per folder! The
 // foldername is then used as the id.
+// The conf file here is stored as JSON, because the content is created
+// and edited via a configuration dialog.
 type Artwork struct {
-	Timestamp   int    `json:"timestamp,omitempty"`
-	ID          string `json:"id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
+	Timestamp   int    `json:"timestamp"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	fpath       string
+}
+
+// NewArtwork loads an artwork configuration and return a pointer.
+func NewArtwork(fpath string) (*Artwork, error) {
+	artw := &Artwork{
+		fpath: fpath,
+	}
+	dataFilePath := filepath.Join(fpath, DataFileName)
+	b, err := ioutil.ReadFile(dataFilePath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return artw, err
+		}
+		// default values when data file is created
+		artw.ID = filepath.Base(fpath)
+		artw.Name = artw.ID
+		// ensure the data file
+		err = artw.WriteData()
+		// return the fresh artwork
+		return artw, err
+	}
+	if err := json.Unmarshal(b, artw); err != nil {
+		return artw, err
+	}
+	return artw, nil
+}
+
+// WriteData writes the artw into a file. If the
+// file does not exist the file is created.
+func (artw *Artwork) WriteData() error {
+	b, err := artw.Marshal()
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(artw.dataFilePath(), b, 0777)
+}
+
+// Marshal wraps the json marshal func. If the file format
+// should be changed it can be done here.
+func (artw *Artwork) Marshal() ([]byte, error) {
+	return json.MarshalIndent(artw, "", "   ")
+}
+
+func (artw *Artwork) dataFilePath() string {
+	return filepath.Join(artw.fpath, DataFileName)
 }
 
 type TimelineItem struct {

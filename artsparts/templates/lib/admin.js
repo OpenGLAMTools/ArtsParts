@@ -1,35 +1,96 @@
 const Artwork = Vue.component('Artwork', {
-  template: `<div></div>`
+  template: `
+  <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="artworkeditLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+      Edit
+      </div>
+      <div class="modal-body">
+      Hallo
+      </div>
+    </div>
+  </div>`,
+  props: ['collection', 'inst', 'coll', 'artw']
 })
 const Collection = Vue.component('Collection', {
-  template: `<div></div>`
+  template: `<div><h3>{{institution.collections[cid].name}}</h3>
+  <ul>
+  <li v-for="a in institution.collections[cid].artworks">
+  <router-link 
+        data-toggle="modal" data-target="#artworkedit"
+        :to="{name: 'artwork', params:{iid:iid, cid:cid, aid:a.id}}">{{a.name}}</router-link>
+  </li>
+  </ul>
+  <router-view :collection=collection id="artworkedit"></router-view>
+  </div>`,
+  computed: {
+    collection: function () {
+      return this.institution.collections[this.coll];
+    },
+    artworks: function () {
+      return makeID(this.institution.collections[this.coll].artworks);
+    }
+  },
+  props: ['institution', 'iid', 'cid']
 })
 const Institution = Vue.component('Institution', {
-  template: `<div>
-<ul>
-<li v-for="coll in institution.collections"><router-link :to="{name: 'collection', params:{inst:inst.id, coll:coll.id}}">{{coll.name}}</router-link></li>
-</ul>
-<router-view :institution=institution></router-view>
+  template: `<div class=""><div class="row">
+  <div class="col-md-2">
+    <ul class="nav nav-pills nav-stacked">
+    <router-link 
+      v-for="c in data[iid].collections" :key="c.id"
+      tag="li"
+      class="presentation"
+      active-class="active" 
+      :to="{name: 'collection', params:{iid:iid, cid:c.id}}"><a>{{c.name}}</a>
+    </router-link>
+    </ul>
+  </div>
+    <div class="col-md-10">
+    <router-view :institution=data[iid] :iid=iid></router-view>
+    </div>
+  </div>
   </div>`,
-  props: ['data', 'inst'],
+  props: {
+    iid: {
+      type: String,
+      default: "dflt"
+    },
+    data: {
+      type: Object,
+      default: function () {
+        return {
+          dflt: {
+            id: "dflt",
+            name: "",
+            collections: [
+              {
+                id: "",
+                name: "",
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
   data: function () {
     return {
-      institution: {}
     }
-  },
-  methods: {
-    getInstitution: function () {
-      this.insitution = this.data[this.inst];
-    }
-  },
-  created: function () {
-    this.getInstitution();
   }
 })
 const Institutions = Vue.component('Institutions', {
-  template: `<div>Your Institutions:
-<ul>
-<li v-for="i in data"><router-link :to="{name: 'institution', params:{inst: i.id}}">{{i.name}}</router-link></li>
+  template: `<div class="container">
+  
+<ul class="nav nav-tabs">
+<router-link 
+  v-for="i in data" :key="i.id"
+  tag="li"
+  class="presentation"
+  active-class="active" 
+  :to="{name: 'institution', params:{iid: i.id}}"><a>{{i.name}}</a>
+</router-link>
 </ul>
 <router-view :data=data></router-view>
   </div>`,
@@ -37,7 +98,23 @@ const Institutions = Vue.component('Institutions', {
     return {
     };
   },
-  props: ['data']
+  props: {
+    data: {
+      type: Object,
+      default: [
+        {
+          id: "",
+          name: "",
+          collections: [
+            {
+              id: "",
+              name: "",
+            }
+          ]
+        }
+      ]
+    }
+  }
 });
 
 const routes = [
@@ -48,19 +125,19 @@ const routes = [
     children: [
       {
         name: 'institution',
-        path: '/:inst',
+        path: ':iid',
         component: Institution,
         props: true,
         children: [
           {
             name: 'collection',
-            path: '/:coll',
+            path: ':cid',
             props: true,
             component: Collection,
             children: [
               {
                 name: 'artwork',
-                path: '/:artw',
+                path: ':aid',
                 props: true,
                 component: Artwork
               }
@@ -81,22 +158,38 @@ const app = new Vue({
   template: `<div><router-link to="/">Institutions</router-link><router-view :data=data></router-view></div>`,
   data: {
     dataLoaded: false,
+    data: {
+      dflt: {
+        id: "dflt",
+        name: "",
+        collections: [
+          {
+            id: "",
+            name: "",
+            dflt: {
+              id: "",
+              name: "",
+              dflt: {
+                id: "",
+                name: ""
+              }
+            }
+          }
+        ]
+      }
+    },
     appdata: [{ id: "", name: "" }]
-  },
-  computed: {
-    data: function () {
-      var inst = {};
-      this.appdata.forEach(function (el, ind, arr) {
-        inst[el.id] = el;
-      });
-      return inst;
-    }
   },
   methods: {
     fetchData: function () {
       this.dataLoaded = false;
       this.$http.get('/data/admin').then(
         (res) => {
+          var data = {};
+          res.body.forEach(function (el, ind, arr) {
+            data[el.id] = el;
+          });
+          this.data = data;
           this.appdata = res.body;
           this.dataLoaded = true;
         }
@@ -108,3 +201,11 @@ const app = new Vue({
   }
 
 }).$mount("#adminapp")
+
+function makeID(arr) {
+  var out = {};
+  arr.forEach(function (el, ind, arr) {
+    out[el.id] = el;
+  })
+  return out;
+}

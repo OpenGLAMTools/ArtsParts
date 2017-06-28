@@ -40,6 +40,7 @@ func main() {
 	}
 	r.HandleFunc("/data/admin", app.adminInstitutions)
 	r.HandleFunc("/data/{institution}/{collection}/{artwork}", app.artwork)
+	r.HandleFunc("/img/{institution}/{collection}/{artwork}", app.img)
 	r.HandleFunc("/data/{institution}/{collection}", app.collection)
 	r.HandleFunc("/data/{institution}", app.institution)
 

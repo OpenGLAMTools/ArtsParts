@@ -159,6 +159,28 @@ func TestNewArtworkEnsureConf(t *testing.T) {
 	}
 
 }
+
+func TestArtworkImgFile(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "artsparts_test")
+	if err != nil {
+		t.Error("can not create tmp dir:", err)
+	}
+	defer os.RemoveAll(tmpDir)
+	b := []byte{}
+	ioutil.WriteFile(filepath.Join(tmpDir, "f1.txt"), b, 0777)
+	ioutil.WriteFile(filepath.Join(tmpDir, "img.jpg"), b, 0777)
+	artw, err := NewArtwork(tmpDir)
+	if err != nil {
+		t.Error("error creating artwork:", err)
+	}
+	imgFile, err := artw.ImgFile()
+	if err != nil {
+		t.Error(err)
+	}
+	if imgFile != "img.jpg" {
+		t.Error("Expect img.jpg got:", imgFile)
+	}
+}
 func Test_loadConf(t *testing.T) {
 	type args struct {
 		filePath string

@@ -8,10 +8,16 @@ const Artwork = Vue.component('Artwork', {
       </div>
       <div class="modal-body">
       Hallo
+      <img :src=imagepath />
       </div>
     </div>
   </div>`,
-  props: ['collection', 'inst', 'coll', 'artw']
+  computed:{
+    imagepath: function(){
+      return "/img/"+this.iid+"/"+this.cid+"/"+this.aid;
+    }
+  },
+  props: ['collection', 'iid', 'cid', 'aid']
 })
 const Collection = Vue.component('Collection', {
   template: `<div><h3>{{institution.collections[cid].name}}</h3>

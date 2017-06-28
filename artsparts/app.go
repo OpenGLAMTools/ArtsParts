@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
 	"github.com/gorilla/mux"
@@ -42,6 +44,31 @@ func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 	session, _ := gothic.Store.Get(r, sessionName)
 	fmt.Fprintf(w, "%#v", session.Values)
+}
+
+func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	instID := vars["institution"]
+	collID := vars["collection"]
+	artwID := vars["artwork"]
+	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
+	if !ok {
+		w.WriteHeader(404)
+		w.Write([]byte("Artwork not found"))
+	}
+	imgFile, err := artw.ImgFile()
+	if err != nil {
+		log.Error("app.img() artw.ImgFile: ", err)
+	}
+	b, err := ioutil.ReadFile(filepath.Join(artw.Fpath, imgFile))
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("Can not load image"))
+		log.Error("can not load image file", err)
+	} else {
+		w.Write(b)
+	}
+
 }
 
 func (app *artsPartsApp) collection(w http.ResponseWriter, r *http.Request) {

@@ -217,13 +217,13 @@ type Artwork struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	fpath       string
+	Fpath       string `json:"-"`
 }
 
 // NewArtwork loads an artwork configuration and return a pointer.
 func NewArtwork(fpath string) (*Artwork, error) {
 	artw := &Artwork{
-		fpath: fpath,
+		Fpath: fpath,
 	}
 	dataFilePath := filepath.Join(fpath, DataFileName)
 	b, err := ioutil.ReadFile(dataFilePath)
@@ -245,6 +245,24 @@ func NewArtwork(fpath string) (*Artwork, error) {
 	return artw, nil
 }
 
+// ImgFile return the filename of the image.
+func (artw *Artwork) ImgFile() (string, error) {
+	fileTypes := []string{".jpg", ".jpeg", ".png"}
+	ls, err := ioutil.ReadDir(artw.Fpath)
+	if err != nil {
+		return "", errors.WithMessage(err, "ReadDir in artwork.ImgFile()")
+	}
+	for _, f := range ls {
+		if f.IsDir() {
+			continue
+		}
+		if helpers.StringInSlice(filepath.Ext(f.Name()), fileTypes) {
+			return f.Name(), nil
+		}
+	}
+	return "", errors.New("No image file found")
+}
+
 // WriteData writes the artw into a file. If the
 // file does not exist the file is created.
 func (artw *Artwork) WriteData() error {
@@ -262,7 +280,7 @@ func (artw *Artwork) Marshal() ([]byte, error) {
 }
 
 func (artw *Artwork) dataFilePath() string {
-	return filepath.Join(artw.fpath, DataFileName)
+	return filepath.Join(artw.Fpath, DataFileName)
 }
 
 type TimelineItem struct {

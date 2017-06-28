@@ -50,8 +50,8 @@ func TestNewInstitution(t *testing.T) {
 	if inst1.ID != "inst1" {
 		t.Error("institution needs an ID")
 	}
-	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"))
-	coll2, _ := NewCollection(filepath.Join("test", "inst1", "coll2"))
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), inst1)
+	coll2, _ := NewCollection(filepath.Join("test", "inst1", "coll2"), inst1)
 	tests := []struct {
 		coll *Collection
 	}{
@@ -70,11 +70,11 @@ func TestNewInstitution(t *testing.T) {
 }
 
 func TestNewCollection(t *testing.T) {
-	coll1, err := NewCollection(filepath.Join("test", "inst1", "coll1"))
+	coll1, err := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
 	if err != nil {
 		t.Error(err)
 	}
-	pic1, err := NewArtwork(filepath.Join("test", "inst1", "coll1", "pic1"))
+	pic1, err := NewArtwork(filepath.Join("test", "inst1", "coll1", "pic1"), coll1)
 	if err != nil {
 		t.Error("NewArtwork returns an error: ", err)
 	}
@@ -89,7 +89,7 @@ func TestNewCollection(t *testing.T) {
 }
 
 func TestNewCollectionID(t *testing.T) {
-	coll2, err := NewCollection(filepath.Join("test", "inst1", "coll2"))
+	coll2, err := NewCollection(filepath.Join("test", "inst1", "coll2"), nil)
 	// conf file does not have a id definition so the
 	// id should be created from the path
 	if err != nil {
@@ -101,7 +101,7 @@ func TestNewCollectionID(t *testing.T) {
 }
 
 func TestCollection_GetArtwork(t *testing.T) {
-	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"))
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
 	type args struct {
 		artwID string
 	}
@@ -149,7 +149,7 @@ func TestNewArtworkEnsureConf(t *testing.T) {
 	if err != nil {
 		t.Error("can not create tmp dir:", err)
 	}
-	artw, err := NewArtwork(tmpDir)
+	artw, err := NewArtwork(tmpDir, nil)
 	if err != nil {
 		t.Error("error creating artwork:", err)
 	}
@@ -157,7 +157,21 @@ func TestNewArtworkEnsureConf(t *testing.T) {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		t.Error("data file does not exist")
 	}
+}
 
+func TestArtworkPath(t *testing.T) {
+	tmpDir, err := ioutil.TempDir("", "artsparts_test")
+	defer os.RemoveAll(tmpDir)
+	if err != nil {
+		t.Error("can not create tmp dir:", err)
+	}
+	artw, err := NewArtwork(tmpDir, nil)
+	if err != nil {
+		t.Error("error creating artwork:", err)
+	}
+	if artw.Path() != tmpDir {
+		t.Error("Artwork need to return the path")
+	}
 }
 
 func TestArtworkImgFile(t *testing.T) {
@@ -169,7 +183,7 @@ func TestArtworkImgFile(t *testing.T) {
 	b := []byte{}
 	ioutil.WriteFile(filepath.Join(tmpDir, "f1.txt"), b, 0777)
 	ioutil.WriteFile(filepath.Join(tmpDir, "img.jpg"), b, 0777)
-	artw, err := NewArtwork(tmpDir)
+	artw, err := NewArtwork(tmpDir, nil)
 	if err != nil {
 		t.Error("error creating artwork:", err)
 	}
@@ -179,6 +193,24 @@ func TestArtworkImgFile(t *testing.T) {
 	}
 	if imgFile != "img.jpg" {
 		t.Error("Expect img.jpg got:", imgFile)
+	}
+}
+
+func TestArtworkIsAdminUser(t *testing.T) {
+	app, _ := NewApp(filepath.Join("test"))
+	artw, _ := app.GetArtwork("inst1", "coll1", "pic1")
+	tests := []struct {
+		user   string
+		expect bool
+	}{
+		{"user1", true},
+		{"abc", false},
+	}
+	for _, tt := range tests {
+		got := artw.IsAdminUser(tt.user)
+		if got != tt.expect {
+			t.Errorf("IsAdminUser returns wrong value\nInput:%s\nExp: %v  Got: %v", tt.user, tt.expect, got)
+		}
 	}
 }
 func Test_loadConf(t *testing.T) {

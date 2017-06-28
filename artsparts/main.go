@@ -38,11 +38,11 @@ func main() {
 	if err != nil {
 		log.Fatal("error initializing app:", err)
 	}
-	r.HandleFunc("/data/admin", app.adminInstitutions)
-	r.HandleFunc("/data/{institution}/{collection}/{artwork}", app.artwork)
-	r.HandleFunc("/img/{institution}/{collection}/{artwork}", app.img)
-	r.HandleFunc("/data/{institution}/{collection}", app.collection)
-	r.HandleFunc("/data/{institution}", app.institution)
+	r.HandleFunc("/data/admin", app.adminInstitutions).Methods("GET")
+	r.HandleFunc("/data/{institution}/{collection}/{artwork}", app.artwork).Methods("GET", "POST")
+	r.HandleFunc("/img/{institution}/{collection}/{artwork}", app.img).Methods("GET")
+	r.HandleFunc("/data/{institution}/{collection}", app.collection).Methods("GET")
+	r.HandleFunc("/data/{institution}", app.institution).Methods("GET")
 
 	log.Infoln("Starting server at: ", conf.ServerPort)
 	log.Fatal(http.ListenAndServe(conf.ServerPort, r))

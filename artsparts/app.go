@@ -2,14 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
 	"github.com/gorilla/mux"
-	"github.com/markbates/goth/gothic"
 )
 
 type artsPartsApp struct {
@@ -32,18 +30,46 @@ func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {
 	instID := vars["institution"]
 	collID := vars["collection"]
 	artwID := vars["artwork"]
+
 	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
 	if !ok {
 		w.WriteHeader(404)
 		w.Write([]byte("Artwork not found"))
 	}
-	b, err := artw.Marshal()
-	if err != nil {
-		log.Error("error marshaling artwork", err)
+	switch r.Method {
+	case "POST":
+		session, err := getSessionValues(r)
+		if err != nil {
+			log.Error("artwork: error reading session", err)
+			return
+		}
+		if !artw.IsAdminUser(session["twitter"]) {
+			w.WriteHeader(403)
+			w.Write([]byte("Forbidden"))
+		}
+		rbody, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Error("artwork: error reading from body", err)
+			return
+		}
+		err = json.Unmarshal(rbody, artw)
+		if err != nil {
+			log.Error("artwork: error unmarshaling body", err)
+			return
+		}
+		err = artw.WriteData()
+		if err != nil {
+			log.Error("artwork: error writing data", err)
+			return
+		}
+	case "GET":
+		b, err := artw.Marshal()
+		if err != nil {
+			log.Error("error marshaling artwork", err)
+		}
+		w.Write(b)
 	}
-	w.Write(b)
-	session, _ := gothic.Store.Get(r, sessionName)
-	fmt.Fprintf(w, "%#v", session.Values)
+
 }
 
 func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +86,7 @@ func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("app.img() artw.ImgFile: ", err)
 	}
-	b, err := ioutil.ReadFile(filepath.Join(artw.Fpath, imgFile))
+	b, err := ioutil.ReadFile(filepath.Join(artw.Path(), imgFile))
 	if err != nil {
 		w.WriteHeader(404)
 		w.Write([]byte("Can not load image"))

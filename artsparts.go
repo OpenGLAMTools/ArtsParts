@@ -82,10 +82,10 @@ func (a *App) GetArtwork(instID, collID, artwID string) (*Artwork, bool) {
 }
 
 // AdminInstitutions returns all the intitutions, where the user is admin
-func (a *App) AdminInstitutions(twitterName string) Institutions {
+func (a *App) AdminInstitutions(userName string) Institutions {
 	ins := []*Institution{}
 	for _, i := range a.Institutions {
-		if helpers.StringInSlice(twitterName, i.Admins) {
+		if helpers.StringInSlice(userName, i.Admins) {
 			ins = append(ins, i)
 		}
 	}
@@ -143,7 +143,7 @@ func NewInstitution(fpath string) (*Institution, error) {
 		if !d.IsDir() {
 			continue
 		}
-		coll, err := NewCollection(filepath.Join(fpath, d.Name()))
+		coll, err := NewCollection(filepath.Join(fpath, d.Name()), inst)
 		if err != nil {
 			return inst, err
 		}
@@ -162,12 +162,15 @@ type Collection struct {
 	License     string     `json:"license" yaml:"license"`
 	Order       int        `json:"order" yaml:"order"`
 	Artworks    []*Artwork `json:"artworks" yaml:"-"`
+	institution *Institution
 }
 
 // NewCollection loads the configuration and creates a pointer to the
 // new collection
-func NewCollection(fpath string) (*Collection, error) {
-	coll := &Collection{}
+func NewCollection(fpath string, inst *Institution) (*Collection, error) {
+	coll := &Collection{
+		institution: inst,
+	}
 	confFile := filepath.Join(fpath, ConfFileName)
 	if err := loadConf(confFile, coll); err != nil {
 		return coll, err
@@ -186,7 +189,7 @@ func NewCollection(fpath string) (*Collection, error) {
 		if !d.IsDir() {
 			continue
 		}
-		artw, err := NewArtwork(filepath.Join(fpath, d.Name()))
+		artw, err := NewArtwork(filepath.Join(fpath, d.Name()), coll)
 		if err != nil {
 			return coll, err
 		}
@@ -217,13 +220,15 @@ type Artwork struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Fpath       string `json:"-"`
+	fpath       string
+	collection  *Collection
 }
 
 // NewArtwork loads an artwork configuration and return a pointer.
-func NewArtwork(fpath string) (*Artwork, error) {
+func NewArtwork(fpath string, coll *Collection) (*Artwork, error) {
 	artw := &Artwork{
-		Fpath: fpath,
+		fpath:      fpath,
+		collection: coll,
 	}
 	dataFilePath := filepath.Join(fpath, DataFileName)
 	b, err := ioutil.ReadFile(dataFilePath)
@@ -248,7 +253,7 @@ func NewArtwork(fpath string) (*Artwork, error) {
 // ImgFile return the filename of the image.
 func (artw *Artwork) ImgFile() (string, error) {
 	fileTypes := []string{".jpg", ".jpeg", ".png"}
-	ls, err := ioutil.ReadDir(artw.Fpath)
+	ls, err := ioutil.ReadDir(artw.fpath)
 	if err != nil {
 		return "", errors.WithMessage(err, "ReadDir in artwork.ImgFile()")
 	}
@@ -279,8 +284,18 @@ func (artw *Artwork) Marshal() ([]byte, error) {
 	return json.MarshalIndent(artw, "", "   ")
 }
 
+// Path returns the stored path to the artwork as string
+func (artw *Artwork) Path() string {
+	return artw.fpath
+}
+
+// IsAdminUser returns true, when the given user has admin rights
+func (artw *Artwork) IsAdminUser(userName string) bool {
+	return helpers.StringInSlice(userName, artw.collection.institution.Admins)
+}
+
 func (artw *Artwork) dataFilePath() string {
-	return filepath.Join(artw.Fpath, DataFileName)
+	return filepath.Join(artw.fpath, DataFileName)
 }
 
 type TimelineItem struct {

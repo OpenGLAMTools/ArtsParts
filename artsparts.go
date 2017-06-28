@@ -216,7 +216,7 @@ func (coll *Collection) GetArtwork(artwID string) (*Artwork, bool) {
 // The conf file here is stored as JSON, because the content is created
 // and edited via a configuration dialog.
 type Artwork struct {
-	Timestamp   int    `json:"timestamp"`
+	Timestamp   string `json:"timestamp"`
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`

@@ -3,8 +3,10 @@ const Artwork = Vue.component('Artwork', {
   <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="artworkeditLabel">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          {{artwork.name}}
+        <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <div class="center-block">
+          <img :src=imagepath class="img-rounded center-block" />
+          </div>
         </div>
         <div class="modal-body">
         <form>
@@ -14,14 +16,15 @@ const Artwork = Vue.component('Artwork', {
           </div>
           <div class="form-group">
             <label for="Timestamp">Timestamp</label>
-            <input type="number" class="form-control" id="Timestamp" v-model="artwork.timestamp">
+            <input  class="form-control" id="Timestamp" placeholder="YYYYMMDDHHMM" v-model="artwork.timestamp">
           </div>
           <div class="form-group">
             <label for="Desc">Description</label>
             <textarea id="Desc" class="form-control" rows="5" v-model="artwork.description"></textarea>
           </div>
-        </form>
-        <img :src=imagepath class="img-rounded" />
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" v-on:click="save">Save changes</button>
+        </form>        
         </div>
       </div>
     </div>
@@ -33,9 +36,27 @@ const Artwork = Vue.component('Artwork', {
   },
   computed:{
     imagepath: function(){
-      return "/img/"+this.iid+"/"+this.cid+"/"+this.artwork.id;
+      return '/img/'+this.iid+'/'+this.cid+'/'+this.artwork.id+"?size=medium";
     }
   },
+  methods: {
+    update: function(){
+      this.artwork =  this.collection.artworks[this.aindex]
+    },
+    save: function(){
+      this.$http.post('/data/'+this.iid+'/'+this.cid+'/'+this.artwork.id, this.artwork).then(response => {
+        $('#artworkedit').modal('hide')
+    // success callback
+    // console.log("Artwork is safed");
+    }, response => {
+      // error callback
+      // console.log("There was an error");
+    });
+    }
+  },
+  watch:{
+    '$route': 'update'
+  }, 
   props: ['collection', 'iid', 'cid', 'aindex']
 })
 const Collection = Vue.component('Collection', {
@@ -116,7 +137,7 @@ const Institution = Vue.component('Institution', {
   }
 })
 const Institutions = Vue.component('Institutions', {
-  template: `<div class="container">
+  template: `<div class="maxwidth">
   
 <ul class="nav nav-tabs">
 <router-link 

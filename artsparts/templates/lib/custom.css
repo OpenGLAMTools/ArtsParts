@@ -3,6 +3,10 @@ body {
   margin: 0 auto;
 }
 
+.maxwidth {
+  max-width: 1000px;
+}
+
 nav {
     padding-right: 5px;
 }

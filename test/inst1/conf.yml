@@ -4,4 +4,4 @@ name: The name of institution 1
 description: The first institution is really great. 
 license: MIT Open Source License
 order: 10
-admins: [user1,user2,lyckade]
+admins: [user1,user2,lyckade,OpenArtsParts]

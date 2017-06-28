@@ -61,7 +61,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Warningln("pageHandler: Error when getSessionValues:", err)
 	}
 	data := templateData{
-		JSFiles:  []string{"/app.js", "admin.js"},
+		JSFiles:  []string{"cleave.min.js", "app.js", "admin.js"},
 		CSSFiles: []string{"custom.css"},
 		JQuery:   true,
 		VueJS:    true,

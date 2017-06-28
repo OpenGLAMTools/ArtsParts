@@ -1,34 +1,63 @@
 const Artwork = Vue.component('Artwork', {
   template: `
   <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="artworkeditLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-      Edit
-      </div>
-      <div class="modal-body">
-      Hallo
-      <img :src=imagepath />
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          {{artwork.name}}
+        </div>
+        <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="Name">Title</label>
+            <input type="text" class="form-control" id="Name" v-model="artwork.name">
+          </div>
+          <div class="form-group">
+            <label for="Timestamp">Timestamp</label>
+            <input type="number" class="form-control" id="Timestamp" v-model="artwork.timestamp">
+          </div>
+          <div class="form-group">
+            <label for="Desc">Description</label>
+            <textarea id="Desc" class="form-control" rows="5" v-model="artwork.description"></textarea>
+          </div>
+        </form>
+        <img :src=imagepath class="img-rounded" />
+        </div>
       </div>
     </div>
   </div>`,
-  computed:{
-    imagepath: function(){
-      return "/img/"+this.iid+"/"+this.cid+"/"+this.aid;
+  data: function(){
+    return {
+      artwork: this.collection.artworks[this.aindex]
     }
   },
-  props: ['collection', 'iid', 'cid', 'aid']
+  computed:{
+    imagepath: function(){
+      return "/img/"+this.iid+"/"+this.cid+"/"+this.artwork.id;
+    }
+  },
+  props: ['collection', 'iid', 'cid', 'aindex']
 })
 const Collection = Vue.component('Collection', {
   template: `<div><h3>{{institution.collections[cid].name}}</h3>
-  <ul>
-  <li v-for="a in institution.collections[cid].artworks">
-  <router-link 
+  <table class="table table-condensed table-striped">
+ 
+  <tr><th>ID</th><th>Name</th><th>Description</th><th>Timestamp</th></tr>
+  <tbody>
+  <tr v-for="(a,i) in institution.collections[cid].artworks">
+  <td><router-link 
         data-toggle="modal" data-target="#artworkedit"
-        :to="{name: 'artwork', params:{iid:iid, cid:cid, aid:a.id}}">{{a.name}}</router-link>
-  </li>
-  </ul>
-  <router-view :collection=collection id="artworkedit"></router-view>
+        :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.id}}</router-link></td>
+<td><router-link 
+        data-toggle="modal" data-target="#artworkedit"
+        :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.name}}</router-link></td>
+<td>{{a.description}}</td>
+<td>{{a.timestamp}}</td>                        
+  </tr>
+  </tbody>
+  </table>
+  
+  <router-view :collection=institution.collections[cid] id="artworkedit"></router-view>
   </div>`,
   computed: {
     collection: function () {
@@ -143,7 +172,7 @@ const routes = [
             children: [
               {
                 name: 'artwork',
-                path: ':aid',
+                path: ':aindex',
                 props: true,
                 component: Artwork
               }
@@ -161,7 +190,12 @@ const router = new VueRouter({
 
 const app = new Vue({
   router,
-  template: `<div><router-link to="/">Institutions</router-link><router-view :data=data></router-view></div>`,
+  template: `<div>
+  <ul>
+  <li><router-link to="/">
+  Administrate your Institutions</router-link></li>
+  </ul>
+  <router-view :data=data></router-view></div>`,
   data: {
     dataLoaded: false,
     data: {

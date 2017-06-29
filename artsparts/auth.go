@@ -39,8 +39,26 @@ func getenv(key string) string {
 func addAuthRoutes(r *mux.Router) *mux.Router {
 	s := r.PathPrefix("/auth/{provider}").Subrouter()
 	s.HandleFunc("/callback", authCallbackHandler).Methods("GET")
+	s.HandleFunc("/logout", logoutHandler).Methods("GET")
 	s.HandleFunc("", authHandler).Methods("GET")
 	return r
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := gothic.Store.Get(r, sessionName)
+
+	if err != nil {
+		log.Warningln("logoutHandler: Error when session get():", err)
+	}
+	session.Values["userid"] = ""
+	session.Values["twitter"] = ""
+	session.Values["access_token"] = ""
+	session.Values["access_token_secret"] = ""
+	err = session.Save(r, w)
+	if err != nil {
+		log.Warningln("logoutHandler: Error on session save: ", err)
+	}
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,9 +109,21 @@ func getSessionValues(r *http.Request) (map[string]string, error) {
 		return nil, errors.Wrap(err, "getSessionValues fails")
 	}
 	vals := make(map[string]string)
-	vals["userid"] = session.Values["userid"].(string)
-	vals["twitter"] = session.Values["twitter"].(string)
-	vals["access_token"] = session.Values["access_token"].(string)
-	vals["access_token_secret"] = session.Values["access_token_secret"].(string)
+	vals["userid"] = getString("userid", session.Values)
+	vals["twitter"] = getString("twitter", session.Values)
+	vals["access_token"] = getString("access_token", session.Values)
+	vals["access_token_secret"] = getString("access_token_secret", session.Values)
 	return vals, nil
+}
+
+func getString(key string, m map[interface{}]interface{}) string {
+	i, ok := m[key]
+	if !ok {
+		return ""
+	}
+	s, ok := i.(string)
+	if !ok {
+		return ""
+	}
+	return s
 }

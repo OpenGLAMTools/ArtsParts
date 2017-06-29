@@ -38,10 +38,12 @@
         ArtsParts
       </a>
       </div>
-      <button type="button" class="btn btn-primary navbar-btn navbar-right" aria-label="Left Align">
-  <span class="glyphicon glyphicon-user" aria-hidden="true"></span> @{{.User}}
-</button>
-      <button type="button" class="btn btn-primary navbar-btn navbar-right">Mit Twitter anmelden</button>
+      {{with .User}}
+      <a href="/auth/twitter/logout" type="button" class="btn btn-primary navbar-btn navbar-right" aria-label="Left Align">
+  <span class="glyphicon glyphicon-user" aria-hidden="true"></span> @{{.}} abmelden
+</a>{{else}}
+      <a href="/auth/twitter" type="button" class="btn btn-primary navbar-btn navbar-right">Mit Twitter anmelden</a>
+      {{end}}
     </div>
   </nav>
 

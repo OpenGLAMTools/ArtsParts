@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -27,17 +26,15 @@ func main() {
 	r.HandleFunc("/page/{page}", pageHandler)
 	r.PathPrefix("/lib/").Handler(http.StripPrefix("/lib/", http.FileServer(http.Dir("templates/lib"))))
 	r.HandleFunc("/tweet", postTweetHandler)
-
+	// Auth routes
+	// /auth/twitter
 	r = addAuthRoutes(r)
-
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "This is artsParts")
-	})
 
 	app, err := newArtsPartsApp(conf.SourceFolder)
 	if err != nil {
 		log.Fatal("error initializing app:", err)
 	}
+	r.HandleFunc("/", app.timeline)
 	r.HandleFunc("/data/admin", app.adminInstitutions).Methods("GET")
 	r.HandleFunc("/data/{institution}/{collection}/{artwork}", app.artwork).Methods("GET", "POST")
 	r.HandleFunc("/img/{institution}/{collection}/{artwork}", app.img).Methods("GET")
@@ -61,7 +58,7 @@ func pageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Warningln("pageHandler: Error when getSessionValues:", err)
 	}
 	data := templateData{
-		JSFiles:  []string{"cleave.min.js", "app.js", "admin.js"},
+		JSFiles:  []string{"app.js", "admin.js"},
 		CSSFiles: []string{"custom.css"},
 		JQuery:   true,
 		VueJS:    true,

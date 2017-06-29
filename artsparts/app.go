@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -22,6 +23,37 @@ func newArtsPartsApp(fpath string) (*artsPartsApp, error) {
 	}
 	app := &artsPartsApp{apApp}
 	return app, nil
+}
+
+func (app *artsPartsApp) defaultTemplateData(r *http.Request) templateData {
+	values, err := getSessionValues(r)
+	if err != nil {
+		log.Warningln("defaultTemplateData: Error when getSessionValues:", err)
+	}
+	return templateData{
+		JSFiles:  []string{"app.js"},
+		CSSFiles: []string{"custom.css"},
+		JQuery:   false,
+		VueJS:    false,
+		User:     values["twitter"],
+	}
+}
+
+func (app *artsPartsApp) executeTemplate(w http.ResponseWriter, name string, data interface{}) {
+	tmpl, err := template.ParseGlob("templates/*.tmpl.htm")
+	if err != nil {
+		log.Error("app.executeTemplate: error when parse glob: ", err)
+	}
+	if err := tmpl.ExecuteTemplate(w, name, data); err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("<h1>404 file not found</h1>"))
+		log.Error("app.executeTemplate: error when execute template: ", err)
+	}
+}
+
+func (app *artsPartsApp) timeline(w http.ResponseWriter, r *http.Request) {
+	data := app.defaultTemplateData(r)
+	app.executeTemplate(w, "timeline", data)
 }
 
 func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {

@@ -15,8 +15,9 @@ func TestAddAuthRoutes(t *testing.T) {
 	router = addAuthRoutes(router)
 	ts := httptest.NewServer(router)
 	testUrls := []string{
-		"/auth/twitter",
-		"/auth/twitter/callback",
+	//"/auth/twitter",
+	//"/auth/twitter/callback",
+	//"/auth/twitter/logout",
 	}
 	for _, tURL := range testUrls {
 		res, err := http.Get(ts.URL + tURL)

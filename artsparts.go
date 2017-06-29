@@ -2,9 +2,11 @@ package artsparts
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/pkg/errors"
@@ -79,6 +81,36 @@ func (a *App) GetArtwork(instID, collID, artwID string) (*Artwork, bool) {
 		return nil, false
 	}
 	return c.GetArtwork(artwID)
+}
+
+// GetTimeline returns artworks, which can displayed in a timeline
+// filter allows to get just special artowrks
+// The logic is
+// /[institution]/[collection]/[artwork.Name]
+// The filter uses the simple regexp.MatchString() function
+func (a *App) GetTimeline(filter string) ([]*Artwork, error) {
+	tl := []*Artwork{}
+	for _, inst := range a.Institutions {
+		for _, coll := range inst.Collections {
+			if filter != "" {
+				for _, artw := range coll.Artworks {
+					p := fmt.Sprintf("/%s/%s/%s", inst.Name, coll.Name, artw.Name)
+
+					match, err := regexp.MatchString(filter, p)
+					if err != nil {
+						return tl, errors.WithStack(err)
+					}
+					if match {
+						tl = append(tl, artw)
+					}
+				}
+			} else {
+				tl = append(tl, coll.Artworks...)
+			}
+
+		}
+	}
+	return tl, nil
 }
 
 // AdminInstitutions returns all the intitutions, where the user is admin

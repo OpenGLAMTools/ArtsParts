@@ -8,6 +8,55 @@ import (
 	"testing"
 )
 
+func TestApp_GetTimeline(t *testing.T) {
+	app, _ := NewApp(filepath.Join("test"))
+	pic1, _ := app.GetArtwork("inst1", "coll1", "pic1")
+	pic2, _ := app.GetArtwork("inst1", "coll1", "pic2")
+	type args struct {
+		filter string
+	}
+	tests := []struct {
+		name    string
+		a       *App
+		args    args
+		want    []*Artwork
+		wantErr bool
+	}{
+		{
+			"find all artworks",
+			app,
+			args{""},
+			[]*Artwork{pic1, pic2},
+			false,
+		},
+		{
+			"find one artworks",
+			app,
+			args{"/*/pic2"},
+			[]*Artwork{pic2},
+			false,
+		},
+		{
+			"wrong pattern",
+			app,
+			args{"*/pic2"},
+			[]*Artwork{},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.a.GetTimeline(tt.args.filter)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("App.GetTimeline() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("App.GetTimeline() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 func TestApp_AdminInstitutions(t *testing.T) {
 	app, _ := NewApp(filepath.Join("test"))
 	inst1, _ := app.GetInstitution("inst1")

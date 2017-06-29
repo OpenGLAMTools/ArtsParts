@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/pkg/errors"
@@ -110,6 +111,7 @@ func (a *App) GetTimeline(filter string) ([]*Artwork, error) {
 
 		}
 	}
+	sort.Sort(Timeline(tl))
 	return tl, nil
 }
 
@@ -329,6 +331,12 @@ func (artw *Artwork) IsAdminUser(userName string) bool {
 func (artw *Artwork) dataFilePath() string {
 	return filepath.Join(artw.fpath, DataFileName)
 }
+
+type Timeline []*Artwork
+
+func (tl Timeline) Len() int           { return len(tl) }
+func (tl Timeline) Swap(i, j int)      { tl[i], tl[j] = tl[j], tl[i] }
+func (tl Timeline) Less(i, j int) bool { return tl[i].Timestamp > tl[j].Timestamp }
 
 type TimelineItem struct {
 	InsitutionName   string

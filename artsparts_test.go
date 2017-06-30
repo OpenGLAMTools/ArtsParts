@@ -92,10 +92,12 @@ func TestApp_AdminInstitutions(t *testing.T) {
 }
 
 func TestNewInstitution(t *testing.T) {
-	inst1, err := NewInstitution(filepath.Join("test", "inst1"))
-	if err != nil {
-		t.Error(err)
+	_, err := NewInstitution("NotExistPath")
+	if err == nil {
+		t.Error("Expect error for NotExistPath")
 	}
+	inst1, _ := NewInstitution(filepath.Join("test", "inst1"))
+
 	if inst1.ID != "inst1" {
 		t.Error("institution needs an ID")
 	}
@@ -119,10 +121,12 @@ func TestNewInstitution(t *testing.T) {
 }
 
 func TestNewCollection(t *testing.T) {
-	coll1, err := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
-	if err != nil {
-		t.Error(err)
+	_, err := NewCollection("NotExistingPath", nil)
+	if err == nil {
+		t.Error("Expect error for NotExistingPath")
 	}
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
+
 	pic1, err := NewArtwork(filepath.Join("test", "inst1", "coll1", "pic1"), coll1)
 	if err != nil {
 		t.Error("NewArtwork returns an error: ", err)

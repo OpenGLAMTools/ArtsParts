@@ -1,6 +1,17 @@
 {{ define "timeline"}}
 {{ template "head" .}}
 <h1>Timeline</h1>
-<div id="adminapp"></div>
+{{range .Timeline}}
+    <div class="thumbnail">
+         <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}"/>
+         <div class="caption">
+             <h4>{{.Name}}</h4>
+             {{with .Description}}
+             <p>{{.}}</p>
+             {{end}}
+         </div>
+    </div>
+    
+{{end}}    
 {{ template "foot" .}}
 {{end}}

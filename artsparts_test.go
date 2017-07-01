@@ -125,7 +125,8 @@ func TestNewCollection(t *testing.T) {
 	if err == nil {
 		t.Error("Expect error for NotExistingPath")
 	}
-	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
+	inst1 := &Institution{ID: "inst1"}
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), inst1)
 
 	pic1, err := NewArtwork(filepath.Join("test", "inst1", "coll1", "pic1"), coll1)
 	if err != nil {
@@ -154,7 +155,8 @@ func TestNewCollectionID(t *testing.T) {
 }
 
 func TestCollection_GetArtwork(t *testing.T) {
-	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
+	inst1 := &Institution{ID: "inst1"}
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), inst1)
 	type args struct {
 		artwID string
 	}

@@ -59,6 +59,11 @@ func (app *artsPartsApp) executeTemplate(w http.ResponseWriter, name string, dat
 
 func (app *artsPartsApp) timeline(w http.ResponseWriter, r *http.Request) {
 	data := app.defaultTemplateData(r)
+	var err error
+	data.Timeline, err = app.artsparts.GetTimeline("")
+	if err != nil {
+		log.Error("app.timeline: error requesting timeline", err)
+	}
 	app.executeTemplate(w, "timeline", data)
 }
 

@@ -93,20 +93,20 @@ func (a *App) GetTimeline(filter string) ([]*Artwork, error) {
 	tl := []*Artwork{}
 	for _, inst := range a.Institutions {
 		for _, coll := range inst.Collections {
-			if filter != "" {
-				for _, artw := range coll.Artworks {
-					p := fmt.Sprintf("/%s/%s/%s", inst.Name, coll.Name, artw.Name)
 
-					match, err := regexp.MatchString(filter, p)
-					if err != nil {
-						return tl, errors.WithStack(err)
-					}
-					if match {
+			for _, artw := range coll.Artworks {
+				p := fmt.Sprintf("/%s/%s/%s", inst.Name, coll.Name, artw.Name)
+
+				match, err := regexp.MatchString(filter, p)
+				if err != nil {
+					return tl, errors.WithStack(err)
+				}
+				if match {
+					if artw.Timestamp != "" {
 						tl = append(tl, artw)
 					}
+
 				}
-			} else {
-				tl = append(tl, coll.Artworks...)
 			}
 
 		}
@@ -249,11 +249,15 @@ func (coll *Collection) GetArtwork(artwID string) (*Artwork, bool) {
 // foldername is then used as the id.
 // The conf file here is stored as JSON, because the content is created
 // and edited via a configuration dialog.
+// Path contains the part of the url how the artwork can be found:
+// /[institution]/[collection]/[artwork]
 type Artwork struct {
 	Timestamp   string `json:"timestamp"`
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	URIPath     string `json:"-"`
+	Parts       []*Part
 	fpath       string
 	collection  *Collection
 }
@@ -281,6 +285,7 @@ func NewArtwork(fpath string, coll *Collection) (*Artwork, error) {
 	if err := json.Unmarshal(b, artw); err != nil {
 		return artw, err
 	}
+	artw.URIPath = fmt.Sprintf("/%s/%s/%s", coll.institution.ID, coll.ID, artw.ID)
 	return artw, nil
 }
 
@@ -330,6 +335,14 @@ func (artw *Artwork) IsAdminUser(userName string) bool {
 
 func (artw *Artwork) dataFilePath() string {
 	return filepath.Join(artw.fpath, DataFileName)
+}
+
+// Part represends a part, which is tweeted from artsparts
+type Part struct {
+	TopLeft     int
+	BottomRight int
+	TweetID     int64
+	MediaID     int64
 }
 
 type Timeline []*Artwork

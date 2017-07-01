@@ -8,5 +8,5 @@ type templateData struct {
 	JQuery   bool
 	VueJS    bool
 	User     string
-	Timeline []artsparts.Artwork
+	Timeline []*artsparts.Artwork
 }

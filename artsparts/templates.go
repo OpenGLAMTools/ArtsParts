@@ -7,6 +7,8 @@ type templateData struct {
 	CSSFiles []string
 	JQuery   bool
 	VueJS    bool
+	Title    string
 	User     string
+	Admin    bool
 	Timeline []*artsparts.Artwork
 }

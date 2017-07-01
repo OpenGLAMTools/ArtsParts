@@ -1,6 +1,11 @@
 $(document).ready(function () {
+    $('.ui.dropdown').dropdown()
+    $('.special.cards .image').dimmer({
+        on: 'hover'
+    });
+    ;
     $('#image').cropper({
-        
+
         viewMode: 1,
         preview: '#preview',
         guides: false,

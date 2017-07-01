@@ -1,16 +1,3 @@
-body {
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.maxwidth {
-  max-width: 1000px;
-}
-
-nav {
-    padding-right: 5px;
-}
-
-img#image {
-  max-width: 80%;
+#topnav{
+  width: 100%;
 }

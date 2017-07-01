@@ -1,34 +1,45 @@
 const Artwork = Vue.component('Artwork', {
   template: `
-  <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="artworkeditLabel">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <div class="center-block">
-          <img :src=imagepath class="img-rounded center-block" />
-          </div>
-        </div>
-        <div class="modal-body">
-        <form>
-          <div class="form-group">
+  <div class="ui modal">
+  <i class="close icon"></i>
+  <div class="header">
+    {{artwork.name}}
+  </div>
+  <div class="image content">
+    <div class="ui medium image">
+      <img :src=imagepath />
+    </div>
+    <div class="description">
+    <p>Edit the data to that artwork. Be sure to save your changes.</p  >
+      <div class="ui form">
+          <div class="field">
             <label for="Name">Title</label>
             <input type="text" class="form-control" id="Name" v-model="artwork.name">
           </div>
-          <div class="form-group">
+          <div class="field">
             <label for="Timestamp">Timestamp</label>
             <input  class="form-control" id="Timestamp" placeholder="YYYYMMDDHHMM" v-model="artwork.timestamp">
           </div>
-          <div class="form-group">
+          <div class="field">
             <label for="Desc">Description</label>
             <textarea id="Desc" class="form-control" rows="5" v-model="artwork.description"></textarea>
           </div>
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" v-on:click="save">Save changes</button>
-        </form>        
-        </div>
-      </div>
+          
+        </div>     
     </div>
-  </div>`,
+  </div>
+  <div class="actions">
+    <div class="ui black deny button">
+      Close and Reload
+    </div>
+    <div class="ui positive right labeled icon button" v-on:click="save">
+      Save changes
+      <i class="checkmark icon"></i>
+    </div>
+  </div>
+</div>
+
+  `,
   data: function(){
     return {
       artwork: this.collection.artworks[this.aindex]
@@ -60,17 +71,18 @@ const Artwork = Vue.component('Artwork', {
   props: ['collection', 'iid', 'cid', 'aindex']
 })
 const Collection = Vue.component('Collection', {
-  template: `<div><h3>{{institution.collections[cid].name}}</h3>
-  <table class="table table-condensed table-striped">
- 
+  template: `<div>
+  <table class="ui celled striped very compact table">
+ <thead>
   <tr><th>ID</th><th>Name</th><th>Description</th><th>Timestamp</th></tr>
+</thead>
   <tbody>
   <tr v-for="(a,i) in institution.collections[cid].artworks">
-  <td><router-link 
-        data-toggle="modal" data-target="#artworkedit"
+  <td v-on:click="modal"><router-link 
+          
         :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.id}}</router-link></td>
-<td><router-link 
-        data-toggle="modal" data-target="#artworkedit"
+<td v-on:click="modal"><router-link 
+        
         :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.name}}</router-link></td>
 <td>{{a.description}}</td>
 <td>{{a.timestamp}}</td>                        
@@ -88,25 +100,26 @@ const Collection = Vue.component('Collection', {
       return makeID(this.institution.collections[this.coll].artworks);
     }
   },
+  methods: {
+    modal: function(){
+       $('.ui.modal').modal('show');
+    }
+  },
   props: ['institution', 'iid', 'cid']
 })
 const Institution = Vue.component('Institution', {
-  template: `<div class=""><div class="row">
-  <div class="col-md-2">
-    <ul class="nav nav-pills nav-stacked">
+  template: `<div class="ui stacked segment grid">
+  <div class="ui vertical pointing menu four wide column">
     <router-link 
       v-for="c in data[iid].collections" :key="c.id"
-      tag="li"
-      class="presentation"
+      class="item"
       active-class="active" 
-      :to="{name: 'collection', params:{iid:iid, cid:c.id}}"><a>{{c.name}}</a>
+      :to="{name: 'collection', params:{iid:iid, cid:c.id}}">{{c.name}}
     </router-link>
-    </ul>
   </div>
-    <div class="col-md-10">
+    <div class="twelve wide column">
     <router-view :institution=data[iid] :iid=iid></router-view>
     </div>
-  </div>
   </div>`,
   props: {
     iid: {
@@ -137,17 +150,15 @@ const Institution = Vue.component('Institution', {
   }
 })
 const Institutions = Vue.component('Institutions', {
-  template: `<div class="maxwidth">
-  
-<ul class="nav nav-tabs">
+  template: `<div class="ui container">
+  <div class="ui pointing menu">
 <router-link 
   v-for="i in data" :key="i.id"
-  tag="li"
-  class="presentation"
+  class="item"
   active-class="active" 
-  :to="{name: 'institution', params:{iid: i.id}}"><a>{{i.name}}</a>
+  :to="{name: 'institution', params:{iid: i.id}}">{{i.name}}
 </router-link>
-</ul>
+</div>
 <router-view :data=data></router-view>
   </div>`,
   data: function () {
@@ -211,7 +222,7 @@ const router = new VueRouter({
 
 const app = new Vue({
   router,
-  template: `<div>
+  template: `<div class="ui segment">
   <ul>
   <li><router-link to="/">
   Administrate your Institutions</router-link></li>

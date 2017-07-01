@@ -2,9 +2,12 @@ package artsparts
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
+	"sort"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/pkg/errors"
@@ -79,6 +82,37 @@ func (a *App) GetArtwork(instID, collID, artwID string) (*Artwork, bool) {
 		return nil, false
 	}
 	return c.GetArtwork(artwID)
+}
+
+// GetTimeline returns artworks, which can displayed in a timeline
+// filter allows to get just special artowrks
+// The logic is
+// /[institution]/[collection]/[artwork.Name]
+// The filter uses the simple regexp.MatchString() function
+func (a *App) GetTimeline(filter string) ([]*Artwork, error) {
+	tl := []*Artwork{}
+	for _, inst := range a.Institutions {
+		for _, coll := range inst.Collections {
+
+			for _, artw := range coll.Artworks {
+				p := fmt.Sprintf("/%s/%s/%s", inst.Name, coll.Name, artw.Name)
+
+				match, err := regexp.MatchString(filter, p)
+				if err != nil {
+					return tl, errors.WithStack(err)
+				}
+				if match {
+					if artw.Timestamp != "" {
+						tl = append(tl, artw)
+					}
+
+				}
+			}
+
+		}
+	}
+	sort.Sort(Timeline(tl))
+	return tl, nil
 }
 
 // AdminInstitutions returns all the intitutions, where the user is admin
@@ -215,11 +249,15 @@ func (coll *Collection) GetArtwork(artwID string) (*Artwork, bool) {
 // foldername is then used as the id.
 // The conf file here is stored as JSON, because the content is created
 // and edited via a configuration dialog.
+// Path contains the part of the url how the artwork can be found:
+// /[institution]/[collection]/[artwork]
 type Artwork struct {
 	Timestamp   string `json:"timestamp"`
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	URIPath     string `json:"-"`
+	Parts       []*Part
 	fpath       string
 	collection  *Collection
 }
@@ -247,6 +285,7 @@ func NewArtwork(fpath string, coll *Collection) (*Artwork, error) {
 	if err := json.Unmarshal(b, artw); err != nil {
 		return artw, err
 	}
+	artw.URIPath = fmt.Sprintf("/%s/%s/%s", coll.institution.ID, coll.ID, artw.ID)
 	return artw, nil
 }
 
@@ -297,6 +336,20 @@ func (artw *Artwork) IsAdminUser(userName string) bool {
 func (artw *Artwork) dataFilePath() string {
 	return filepath.Join(artw.fpath, DataFileName)
 }
+
+// Part represends a part, which is tweeted from artsparts
+type Part struct {
+	TopLeft     int
+	BottomRight int
+	TweetID     int64
+	MediaID     int64
+}
+
+type Timeline []*Artwork
+
+func (tl Timeline) Len() int           { return len(tl) }
+func (tl Timeline) Swap(i, j int)      { tl[i], tl[j] = tl[j], tl[i] }
+func (tl Timeline) Less(i, j int) bool { return tl[i].Timestamp > tl[j].Timestamp }
 
 type TimelineItem struct {
 	InsitutionName   string

@@ -8,6 +8,55 @@ import (
 	"testing"
 )
 
+func TestApp_GetTimeline(t *testing.T) {
+	app, _ := NewApp(filepath.Join("test"))
+	pic1, _ := app.GetArtwork("inst1", "coll1", "pic1")
+	pic2, _ := app.GetArtwork("inst1", "coll1", "pic2")
+	type args struct {
+		filter string
+	}
+	tests := []struct {
+		name    string
+		a       *App
+		args    args
+		want    []*Artwork
+		wantErr bool
+	}{
+		{
+			"find all artworks",
+			app,
+			args{""},
+			[]*Artwork{pic1, pic2},
+			false,
+		},
+		{
+			"find one artworks",
+			app,
+			args{"/*/pic2"},
+			[]*Artwork{pic2},
+			false,
+		},
+		{
+			"wrong pattern",
+			app,
+			args{"*/pic2"},
+			[]*Artwork{},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.a.GetTimeline(tt.args.filter)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("App.GetTimeline() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("App.GetTimeline() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 func TestApp_AdminInstitutions(t *testing.T) {
 	app, _ := NewApp(filepath.Join("test"))
 	inst1, _ := app.GetInstitution("inst1")
@@ -43,10 +92,12 @@ func TestApp_AdminInstitutions(t *testing.T) {
 }
 
 func TestNewInstitution(t *testing.T) {
-	inst1, err := NewInstitution(filepath.Join("test", "inst1"))
-	if err != nil {
-		t.Error(err)
+	_, err := NewInstitution("NotExistPath")
+	if err == nil {
+		t.Error("Expect error for NotExistPath")
 	}
+	inst1, _ := NewInstitution(filepath.Join("test", "inst1"))
+
 	if inst1.ID != "inst1" {
 		t.Error("institution needs an ID")
 	}
@@ -70,10 +121,13 @@ func TestNewInstitution(t *testing.T) {
 }
 
 func TestNewCollection(t *testing.T) {
-	coll1, err := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
-	if err != nil {
-		t.Error(err)
+	_, err := NewCollection("NotExistingPath", nil)
+	if err == nil {
+		t.Error("Expect error for NotExistingPath")
 	}
+	inst1 := &Institution{ID: "inst1"}
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), inst1)
+
 	pic1, err := NewArtwork(filepath.Join("test", "inst1", "coll1", "pic1"), coll1)
 	if err != nil {
 		t.Error("NewArtwork returns an error: ", err)
@@ -101,7 +155,8 @@ func TestNewCollectionID(t *testing.T) {
 }
 
 func TestCollection_GetArtwork(t *testing.T) {
-	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), nil)
+	inst1 := &Institution{ID: "inst1"}
+	coll1, _ := NewCollection(filepath.Join("test", "inst1", "coll1"), inst1)
 	type args struct {
 		artwID string
 	}

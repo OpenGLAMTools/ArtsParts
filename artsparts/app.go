@@ -13,7 +13,9 @@ import (
 )
 
 type artsPartsApp struct {
-	artsparts *artsparts.App
+	artsparts        *artsparts.App
+	muxVars          func(r *http.Request) map[string]string
+	getSessionValues func(r *http.Request) (map[string]string, error)
 }
 
 func newArtsPartsApp(fpath string) (*artsPartsApp, error) {
@@ -21,19 +23,23 @@ func newArtsPartsApp(fpath string) (*artsPartsApp, error) {
 	if err != nil {
 		return nil, err
 	}
-	app := &artsPartsApp{apApp}
+	app := &artsPartsApp{
+		apApp,
+		mux.Vars,
+		getSessionValues,
+	}
 	return app, nil
 }
 
 func (app *artsPartsApp) defaultTemplateData(r *http.Request) templateData {
-	values, err := getSessionValues(r)
+	values, err := app.getSessionValues(r)
 	if err != nil {
 		log.Warningln("defaultTemplateData: Error when getSessionValues:", err)
 	}
 	return templateData{
 		JSFiles:  []string{"app.js"},
 		CSSFiles: []string{"custom.css"},
-		JQuery:   false,
+		JQuery:   true,
 		VueJS:    false,
 		User:     values["twitter"],
 	}
@@ -53,13 +59,18 @@ func (app *artsPartsApp) executeTemplate(w http.ResponseWriter, name string, dat
 
 func (app *artsPartsApp) timeline(w http.ResponseWriter, r *http.Request) {
 	data := app.defaultTemplateData(r)
+	var err error
+	data.Timeline, err = app.artsparts.GetTimeline("")
+	if err != nil {
+		log.Error("app.timeline: error requesting timeline", err)
+	}
 	app.executeTemplate(w, "timeline", data)
 }
 
 func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
-	vars := mux.Vars(r)
+	vars := app.muxVars(r)
 	instID := vars["institution"]
 	collID := vars["collection"]
 	artwID := vars["artwork"]
@@ -71,7 +82,7 @@ func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case "POST":
-		session, err := getSessionValues(r)
+		session, err := app.getSessionValues(r)
 		if err != nil {
 			log.Error("artwork: error reading session", err)
 			return
@@ -111,7 +122,7 @@ func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {
 //   * medium 300x300
 //   * big 600x600
 func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
+	vars := app.muxVars(r)
 	instID := vars["institution"]
 	collID := vars["collection"]
 	artwID := vars["artwork"]
@@ -151,7 +162,7 @@ func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
 func (app *artsPartsApp) collection(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
-	vars := mux.Vars(r)
+	vars := app.muxVars(r)
 	instID := vars["institution"]
 	collID := vars["collection"]
 	coll, ok := app.artsparts.GetCollection(instID, collID)
@@ -169,7 +180,7 @@ func (app *artsPartsApp) collection(w http.ResponseWriter, r *http.Request) {
 func (app *artsPartsApp) institution(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
-	vars := mux.Vars(r)
+	vars := app.muxVars(r)
 	instID := vars["institution"]
 	inst, ok := app.artsparts.GetInstitution(instID)
 	if !ok {
@@ -184,7 +195,7 @@ func (app *artsPartsApp) institution(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *artsPartsApp) adminInstitutions(w http.ResponseWriter, r *http.Request) {
-	session, err := getSessionValues(r)
+	session, err := app.getSessionValues(r)
 	if err != nil {
 		log.Error("adminInstitutions error getSessionValues:", err)
 	}

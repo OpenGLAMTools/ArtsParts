@@ -1,38 +1,48 @@
-{{ define "timeline"}} {{ template "head" .}}
-
+{{ define "timeline"}}
 <div class="ui stackable three column grid container">
+    <div class="row">
+        {{ template "head" .}}
+        <br><br>
+    </div>
+
+
     <div class="row">
         <h1>Timeline</h1>
     </div>
 
-    <div class="ui special cards">
+    <div class="ui divided items">
         {{range .Timeline}}
-        <div class="card">
-            <div class="blurring dimmable image">
-                <div class="ui inverted dimmer">
-                    <div class="content">
-                        <div class="center">
-                            <div class="ui primary button">ArtPart erstellen</div>
-                        </div>
-                    </div>
-                </div>
+        <div class="item">
+            <a class="ui medium image">
                 <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}" />
-            </div>
-            <div class="content">
+            </a>
+
+            <div class="middle aligned content">
+
                 <a class="header">{{.Name}}</a>
+
                 <div class="meta">
-                    <p>{{.Description}}</p>
-                    <span class="date">Created {{.Timestamp}}</span>
+                    <div class="date">Created {{.Timestamp}}</div>
+
                 </div>
-            </div>
-            <div class="extra content">
-                <a>
+                <div class="description">
+                    <p>{{.Description}}</p>
+                </div>
+                <div class="extra">
+                    Hej ho
+                    <a>
                 <i class="twitter icon"></i>
                 24 ArtPart Tweet
                 </a>
+                    <div class="ui right floated primary button">
+                        ArtPart erstellen
+                        <i class="right paint brush icon"></i>
+                    </div>
+                </div>
             </div>
+
         </div>
         {{end}}
     </div>
 </div>
-    {{ template "foot" .}} {{end}}
+{{ template "foot" .}} {{end}}

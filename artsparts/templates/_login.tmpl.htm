@@ -1,0 +1,8 @@
+{{define "login"}}
+    {{with .User}}
+        <a href="/auth/twitter/logout" class="item">
+         <i class="twitter icon" ></i> @{{.}} abmelden
+        </a>{{else}}
+        <a href="/auth/twitter" class="item"><i class="twitter icon" ></i>Mit Twitter anmelden</a>
+    {{end}}
+{{end}}

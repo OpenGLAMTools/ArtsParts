@@ -36,12 +36,19 @@ func (app *artsPartsApp) defaultTemplateData(r *http.Request) templateData {
 	if err != nil {
 		log.Warningln("defaultTemplateData: Error when getSessionValues:", err)
 	}
+	admInst := app.artsparts.AdminInstitutions(values["twitter"])
+	isAdmin := false
+	if len(admInst) > 0 {
+		isAdmin = true
+	}
 	return templateData{
 		JSFiles:  []string{"app.js"},
 		CSSFiles: []string{"custom.css"},
 		JQuery:   true,
 		VueJS:    false,
+		Title:    "artsparts",
 		User:     values["twitter"],
+		Admin:    isAdmin,
 	}
 }
 

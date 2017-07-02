@@ -1,16 +1,7 @@
-body {
-  max-width: 1000px;
-  margin: 0 auto;
+#topnav{
+  width: 100%;
 }
 
-.maxwidth {
-  max-width: 1000px;
-}
-
-nav {
-    padding-right: 5px;
-}
-
-img#image {
-  max-width: 80%;
+.fullwidth{
+  width: 100%;
 }

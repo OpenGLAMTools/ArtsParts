@@ -28,7 +28,7 @@ func TestAdmin_Institutions(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		a    *Admin
+		a    *AdminDel
 		args args
 		want artsparts.Institutions
 	}{

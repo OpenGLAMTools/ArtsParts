@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 )
@@ -10,20 +8,20 @@ import (
 // Admin is used for managing all admin issues. It also implements
 // the http.Handler interface and is used to serve all the admin
 // pages.
-type Admin struct {
+type AdminDel struct {
 	institutions artsparts.Institutions
 }
 
 // NewAdmin returns a pointer to a new instance
-func NewAdmin(i artsparts.Institutions) *Admin {
-	return &Admin{
+func NewAdmin(i artsparts.Institutions) *AdminDel {
+	return &AdminDel{
 		institutions: i,
 	}
 }
 
 // Institutions takes the twitterName of the user and returns the institutions
 // where he/she is admin of
-func (a *Admin) Institutions(twitterName string) artsparts.Institutions {
+func (a *AdminDel) Institutions(twitterName string) artsparts.Institutions {
 	out := artsparts.Institutions{}
 	for _, i := range a.institutions {
 		if helpers.StringInSlice(twitterName, i.Admins) {
@@ -31,8 +29,4 @@ func (a *Admin) Institutions(twitterName string) artsparts.Institutions {
 		}
 	}
 	return out
-}
-
-func (a *Admin) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 }

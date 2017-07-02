@@ -8,44 +8,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
   <meta name="description" content="">
-  <meta name="author" content="">
-  <link rel="icon" href="/favicon.ico">
+  <meta name="author" content="Andreas Schroepfer">
 
-  <title>Fixed Top Navbar Example for Bootstrap</title>
+  <title>{{.Title}}</title>
 
-  <!-- Latest compiled and minified CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-    crossorigin="anonymous">
-
-  <!-- Optional theme -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
-    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.css" integrity="sha256-5+W3JHnvGYIJkVxUBsw+jBi9+pOlu9enPX3vZapXj5M=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.css" />
 
-  <!-- Custom styles for this template -->
-  {{range .CSSFiles}}
+{{range .CSSFiles}}
   <link href="/lib/{{.}}" rel="stylesheet">
 {{- end}}
-
 </head>
 
 <body>
 
-  <nav class="navbar navbar-default">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="#">
-        ArtsParts
-      </a>
-      </div>
-      {{with .User}}
-      <a href="/auth/twitter/logout" type="button" class="btn btn-primary navbar-btn navbar-right" aria-label="Left Align">
-  <span class="glyphicon glyphicon-user" aria-hidden="true"></span> @{{.}} abmelden
-</a>{{else}}
-      <a href="/auth/twitter" type="button" class="btn btn-primary navbar-btn navbar-right">Mit Twitter anmelden</a>
-      {{end}}
-    </div>
-  </nav>
+<div class="ui grid container">
+ 
+<div class="row">
+  {{ template "nav" . }}
+ 
+</div>  
+ 
 
-  <div class="container">
+</div>
+  
 {{ end }}      

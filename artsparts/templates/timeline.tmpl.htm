@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {{ define "timeline"}} {{ template "head" .}}
 
 <div class="ui stackable three column grid container">
@@ -31,8 +32,57 @@
                 24 ArtPart Tweet
                 </a>
             </div>
+=======
+{{ define "timeline"}}
+<div class="ui stackable three column grid container">
+    <div class="row">
+        {{ template "head" .}}
+        <br><br>
+    </div>
+
+
+    <div class="row">
+        <h1>Timeline</h1>
+    </div>
+
+    <div class="ui divided items">
+        {{range .Timeline}}
+        <div class="item">
+            <a class="ui medium image">
+                <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}" />
+            </a>
+
+            <div class="middle aligned content">
+
+                <a class="header">{{.Name}}</a>
+
+                <div class="meta">
+                    <div class="date">Created {{.Timestamp}}</div>
+
+                </div>
+                <div class="description">
+                    <p>{{.Description}}</p>
+                </div>
+                <div class="extra">
+                    Hej ho
+                    <a>
+                <i class="twitter icon"></i>
+                24 ArtPart Tweet
+                </a>
+                    <div class="ui right floated primary button">
+                        ArtPart erstellen
+                        <i class="right paint brush icon"></i>
+                    </div>
+                </div>
+            </div>
+
+>>>>>>> refs/remotes/origin/timeline
         </div>
         {{end}}
     </div>
 </div>
+<<<<<<< HEAD
     {{ template "foot" .}} {{end}}
+=======
+{{ template "foot" .}} {{end}}
+>>>>>>> refs/remotes/origin/timeline

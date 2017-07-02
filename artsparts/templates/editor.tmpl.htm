@@ -1,0 +1,10 @@
+{{ define "editor"}}
+{{ template "head" .}}
+<div class="ui container">
+<h1>Editor</h1>
+{{.Vars.artwork}}
+<img src="/img/{{.Vars.institution}}/{{.Vars.collection}}/{{.Vars.artwork}}?size=massive" />
+<div id="editor"></div>
+</div>
+{{ template "foot" .}}
+{{end}}

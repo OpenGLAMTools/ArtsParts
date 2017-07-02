@@ -10,5 +10,6 @@ type templateData struct {
 	Title    string
 	User     string
 	Admin    bool
+	Vars     map[string]string
 	Timeline []*artsparts.Artwork
 }

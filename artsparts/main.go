@@ -27,8 +27,15 @@ func main() {
 	// Auth routes
 	// /auth/twitter
 	r = addAuthRoutes(r)
+	r = addAppRoutes(r, conf.SourceFolder)
 
-	app, err := NewArtsPartsApp(conf.SourceFolder)
+	log.Infoln("Starting server at: ", conf.ServerPort)
+	log.Fatal(http.ListenAndServe(conf.ServerPort, r))
+
+}
+
+func addAppRoutes(r *mux.Router, sourceFolder string) *mux.Router {
+	app, err := NewArtsPartsApp(sourceFolder)
 	if err != nil {
 		log.Fatal("error initializing app:", err)
 	}
@@ -43,8 +50,5 @@ func main() {
 
 	r.HandleFunc("/editor/{institution}/{collection}/{artwork}", app.Editor).Methods("GET")
 	r.HandleFunc("/artpart/{institution}/{collection}/{artwork}", app.Artpart).Methods("POST")
-
-	log.Infoln("Starting server at: ", conf.ServerPort)
-	log.Fatal(http.ListenAndServe(conf.ServerPort, r))
-
+	return r
 }

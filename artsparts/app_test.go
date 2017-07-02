@@ -11,16 +11,16 @@ import (
 
 func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 	app, _ := NewArtsPartsApp("../test")
-	app.getSessionValues = func(r *http.Request) (map[string]string, error) {
+	app.getSessionValues = func(r *http.Request) map[string]string {
 		return map[string]string{
 			"twitter": "user1",
-		}, nil
+		}
 	}
 	app2, _ := NewArtsPartsApp("../test")
-	app2.getSessionValues = func(r *http.Request) (map[string]string, error) {
+	app2.getSessionValues = func(r *http.Request) map[string]string {
 		return map[string]string{
 			"twitter": "user11",
-		}, nil
+		}
 	}
 
 	type args struct {
@@ -35,7 +35,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 		{
 			"Admin user",
 			app,
-			args{nil},
+			args{&http.Request{}},
 			templateData{
 				JSFiles:  []string{"app.js"},
 				CSSFiles: []string{"custom.css"},
@@ -43,13 +43,14 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 				VueJS:    false,
 				Title:    "artsparts",
 				User:     "user1",
+				Vars:     map[string]string{},
 				Admin:    true,
 			},
 		},
 		{
 			"Normal user",
 			app2,
-			args{nil},
+			args{&http.Request{}},
 			templateData{
 				JSFiles:  []string{"app.js"},
 				CSSFiles: []string{"custom.css"},
@@ -57,6 +58,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 				VueJS:    false,
 				Title:    "artsparts",
 				User:     "user11",
+				Vars:     map[string]string{},
 				Admin:    false,
 			},
 		},
@@ -75,10 +77,10 @@ func Test_artsPartsApp_artwork(t *testing.T) {
 	artspartsApp, _ := artsparts.NewApp("../test")
 	app := &ArtsPartsApp{
 		artsparts: artspartsApp,
-		getSessionValues: func(r *http.Request) (map[string]string, error) {
+		getSessionValues: func(r *http.Request) map[string]string {
 			return map[string]string{
 				"twitter": "user1",
-			}, nil
+			}
 		},
 		muxVars: func(r *http.Request) map[string]string {
 			// Using RequestURI to mock the different outputs

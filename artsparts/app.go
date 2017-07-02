@@ -42,6 +42,10 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) templateData {
 	if len(admInst) > 0 {
 		isAdmin = true
 	}
+	vars := app.muxVars(r)
+	if vars == nil {
+		vars = make(map[string]string)
+	}
 	return templateData{
 		JSFiles:  []string{"app.js"},
 		CSSFiles: []string{"custom.css"},
@@ -49,6 +53,7 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) templateData {
 		VueJS:    false,
 		Title:    "artsparts",
 		User:     values["twitter"],
+		Vars:     vars,
 		Admin:    isAdmin,
 	}
 }
@@ -68,15 +73,17 @@ func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, dat
 // Page serves the templates direct. It is important to add a new template also
 // to the allowed pages variable.
 func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
+	// Config the allowed pages here
 	allowedPages := []string{"admin"}
-	vars := mux.Vars(r)
-	page := vars["page"]
+
+	data := app.defaultTemplateData(r)
+	page := data.Vars["page"]
 	if !helpers.StringInSlice(page, allowedPages) {
 		w.WriteHeader(404)
 		w.Write([]byte("<h1>404 file not found</h1>"))
 		return
 	}
-	data := app.defaultTemplateData(r)
+
 	// page individual configuration
 	switch page {
 	case "admin":
@@ -102,6 +109,8 @@ func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 //   * small 150x150
 //   * medium 300x300
 //   * big 600x600
+//   * huge 800x800
+//   * massive 960x960
 func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 	vars := app.muxVars(r)
 	instID := vars["institution"]
@@ -131,6 +140,10 @@ func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 		img = imaging.Fit(img, 300, 300, imaging.Lanczos)
 	case "big":
 		img = imaging.Fit(img, 600, 600, imaging.Lanczos)
+	case "huge":
+		img = imaging.Fit(img, 800, 800, imaging.Lanczos)
+	case "massive":
+		img = imaging.Fit(img, 960, 960, imaging.Lanczos)
 	}
 	err = imaging.Encode(w, img, imaging.JPEG)
 	if err != nil {
@@ -179,6 +192,12 @@ func (app *ArtsPartsApp) Institution(w http.ResponseWriter, r *http.Request) {
 
 // Editor is the handlefunc to serve the editor
 func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
+	// path:
+	// /editor/{institution}/{collection}/{artwork}
+	/*vars := app.muxVars(r)
+	instID := vars["institution"]
+	collID := vars["collection"]
+	artwID := vars["artwork"]*/
 	data := app.defaultTemplateData(r)
 	app.executeTemplate(w, "editor", data)
 

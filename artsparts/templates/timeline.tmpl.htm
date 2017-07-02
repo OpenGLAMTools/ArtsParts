@@ -1,38 +1,3 @@
-<<<<<<< HEAD
-{{ define "timeline"}} {{ template "head" .}}
-
-<div class="ui stackable three column grid container">
-    <div class="row">
-        <h1>Timeline</h1>
-    </div>
-
-    <div class="ui special cards">
-        {{range .Timeline}}
-        <div class="card">
-            <div class="blurring dimmable image">
-                <div class="ui inverted dimmer">
-                    <div class="content">
-                        <div class="center">
-                            <div class="ui primary button">ArtPart erstellen</div>
-                        </div>
-                    </div>
-                </div>
-                <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}" />
-            </div>
-            <div class="content">
-                <a class="header">{{.Name}}</a>
-                <div class="meta">
-                    <p>{{.Description}}</p>
-                    <span class="date">Created {{.Timestamp}}</span>
-                </div>
-            </div>
-            <div class="extra content">
-                <a>
-                <i class="twitter icon"></i>
-                24 ArtPart Tweet
-                </a>
-            </div>
-=======
 {{ define "timeline"}}
 <div class="ui stackable three column grid container">
     <div class="row">
@@ -76,13 +41,8 @@
                 </div>
             </div>
 
->>>>>>> refs/remotes/origin/timeline
         </div>
         {{end}}
     </div>
 </div>
-<<<<<<< HEAD
-    {{ template "foot" .}} {{end}}
-=======
 {{ template "foot" .}} {{end}}
->>>>>>> refs/remotes/origin/timeline

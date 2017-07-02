@@ -8,22 +8,25 @@ import (
 	"path/filepath"
 
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
+	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/disintegration/imaging"
 	"github.com/gorilla/mux"
 )
 
-type artsPartsApp struct {
+// ArtsPartsApp contains all the handlefuncs
+type ArtsPartsApp struct {
 	artsparts        *artsparts.App
 	muxVars          func(r *http.Request) map[string]string
-	getSessionValues func(r *http.Request) (map[string]string, error)
+	getSessionValues func(r *http.Request) map[string]string
 }
 
-func newArtsPartsApp(fpath string) (*artsPartsApp, error) {
+// NewArtsPartsApp creates a new app
+func NewArtsPartsApp(fpath string) (*ArtsPartsApp, error) {
 	apApp, err := artsparts.NewApp(fpath)
 	if err != nil {
 		return nil, err
 	}
-	app := &artsPartsApp{
+	app := &ArtsPartsApp{
 		apApp,
 		mux.Vars,
 		getSessionValues,
@@ -31,11 +34,9 @@ func newArtsPartsApp(fpath string) (*artsPartsApp, error) {
 	return app, nil
 }
 
-func (app *artsPartsApp) defaultTemplateData(r *http.Request) templateData {
-	values, err := app.getSessionValues(r)
-	if err != nil {
-		log.Warningln("defaultTemplateData: Error when getSessionValues:", err)
-	}
+func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) templateData {
+	values := app.getSessionValues(r)
+
 	admInst := app.artsparts.AdminInstitutions(values["twitter"])
 	isAdmin := false
 	if len(admInst) > 0 {
@@ -52,7 +53,7 @@ func (app *artsPartsApp) defaultTemplateData(r *http.Request) templateData {
 	}
 }
 
-func (app *artsPartsApp) executeTemplate(w http.ResponseWriter, name string, data interface{}) {
+func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, data interface{}) {
 	tmpl, err := template.ParseGlob("templates/*.tmpl.htm")
 	if err != nil {
 		log.Error("app.executeTemplate: error when parse glob: ", err)
@@ -64,7 +65,29 @@ func (app *artsPartsApp) executeTemplate(w http.ResponseWriter, name string, dat
 	}
 }
 
-func (app *artsPartsApp) timeline(w http.ResponseWriter, r *http.Request) {
+// Page serves the templates direct. It is important to add a new template also
+// to the allowed pages variable.
+func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
+	allowedPages := []string{"admin"}
+	vars := mux.Vars(r)
+	page := vars["page"]
+	if !helpers.StringInSlice(page, allowedPages) {
+		w.WriteHeader(404)
+		w.Write([]byte("<h1>404 file not found</h1>"))
+		return
+	}
+	data := app.defaultTemplateData(r)
+	// page individual configuration
+	switch page {
+	case "admin":
+		data.JSFiles = append(data.JSFiles, "admin.js")
+		data.VueJS = true
+	}
+	app.executeTemplate(w, page, data)
+}
+
+// Timeline serves the homepage with timeline
+func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 	data := app.defaultTemplateData(r)
 	var err error
 	data.Timeline, err = app.artsparts.GetTimeline("")
@@ -74,61 +97,12 @@ func (app *artsPartsApp) timeline(w http.ResponseWriter, r *http.Request) {
 	app.executeTemplate(w, "timeline", data)
 }
 
-func (app *artsPartsApp) artwork(w http.ResponseWriter, r *http.Request) {
-	// path:
-	// /data/{institution}/{collection}/{artwork}
-	vars := app.muxVars(r)
-	instID := vars["institution"]
-	collID := vars["collection"]
-	artwID := vars["artwork"]
-
-	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
-	if !ok {
-		w.WriteHeader(404)
-		w.Write([]byte("Artwork not found"))
-	}
-	switch r.Method {
-	case "POST":
-		session, err := app.getSessionValues(r)
-		if err != nil {
-			log.Error("artwork: error reading session", err)
-			return
-		}
-		if !artw.IsAdminUser(session["twitter"]) {
-			w.WriteHeader(403)
-			w.Write([]byte("Forbidden"))
-		}
-		rbody, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Error("artwork: error reading from body", err)
-			return
-		}
-		err = json.Unmarshal(rbody, artw)
-		if err != nil {
-			log.Error("artwork: error unmarshaling body", err)
-			return
-		}
-		err = artw.WriteData()
-		if err != nil {
-			log.Error("artwork: error writing data", err)
-			return
-		}
-	case "GET":
-		b, err := artw.Marshal()
-		if err != nil {
-			log.Error("error marshaling artwork", err)
-		}
-		w.Write(b)
-	}
-
-}
-
 // Img is the handler for serving the images. The url accepts also different
 // sizes. If size is part of the url the image is resized.
 //   * small 150x150
 //   * medium 300x300
 //   * big 600x600
-func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
+func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 	vars := app.muxVars(r)
 	instID := vars["institution"]
 	collID := vars["collection"]
@@ -166,7 +140,8 @@ func (app *artsPartsApp) img(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *artsPartsApp) collection(w http.ResponseWriter, r *http.Request) {
+// Collection is the REST api for serving the Collection via json
+func (app *ArtsPartsApp) Collection(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
 	vars := app.muxVars(r)
@@ -184,7 +159,8 @@ func (app *artsPartsApp) collection(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (app *artsPartsApp) institution(w http.ResponseWriter, r *http.Request) {
+// Institution is the REST api for serving the institution via json
+func (app *ArtsPartsApp) Institution(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
 	vars := app.muxVars(r)
@@ -201,11 +177,22 @@ func (app *artsPartsApp) institution(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (app *artsPartsApp) adminInstitutions(w http.ResponseWriter, r *http.Request) {
-	session, err := app.getSessionValues(r)
-	if err != nil {
-		log.Error("adminInstitutions error getSessionValues:", err)
-	}
+// Editor is the handlefunc to serve the editor
+func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
+	data := app.defaultTemplateData(r)
+	app.executeTemplate(w, "editor", data)
+
+}
+
+// Artpart serves the json api for tweeting a created artpart
+func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
+
+}
+
+// AdminInstitutions is the handlefunc for the admin page, which is a onepage app
+func (app *ArtsPartsApp) AdminInstitutions(w http.ResponseWriter, r *http.Request) {
+	session := app.getSessionValues(r)
+
 	twitterName := session["twitter"]
 	inss := app.artsparts.AdminInstitutions(twitterName)
 
@@ -214,4 +201,51 @@ func (app *artsPartsApp) adminInstitutions(w http.ResponseWriter, r *http.Reques
 		log.Error("error marshaling institution", err)
 	}
 	w.Write(b)
+}
+
+// Artwork is the REST api for the AdminInstitution app
+func (app *ArtsPartsApp) Artwork(w http.ResponseWriter, r *http.Request) {
+	// path:
+	// /data/{institution}/{collection}/{artwork}
+	vars := app.muxVars(r)
+	instID := vars["institution"]
+	collID := vars["collection"]
+	artwID := vars["artwork"]
+
+	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
+	if !ok {
+		w.WriteHeader(404)
+		w.Write([]byte("Artwork not found"))
+	}
+	switch r.Method {
+	case "POST":
+		session := app.getSessionValues(r)
+
+		if !artw.IsAdminUser(session["twitter"]) {
+			w.WriteHeader(403)
+			w.Write([]byte("Forbidden"))
+		}
+		rbody, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Error("artwork: error reading from body", err)
+			return
+		}
+		err = json.Unmarshal(rbody, artw)
+		if err != nil {
+			log.Error("artwork: error unmarshaling body", err)
+			return
+		}
+		err = artw.WriteData()
+		if err != nil {
+			log.Error("artwork: error writing data", err)
+			return
+		}
+	case "GET":
+		b, err := artw.Marshal()
+		if err != nil {
+			log.Error("error marshaling artwork", err)
+		}
+		w.Write(b)
+	}
+
 }

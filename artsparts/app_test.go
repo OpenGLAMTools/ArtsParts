@@ -10,13 +10,13 @@ import (
 )
 
 func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
-	app, _ := newArtsPartsApp("../test")
+	app, _ := NewArtsPartsApp("../test")
 	app.getSessionValues = func(r *http.Request) (map[string]string, error) {
 		return map[string]string{
 			"twitter": "user1",
 		}, nil
 	}
-	app2, _ := newArtsPartsApp("../test")
+	app2, _ := NewArtsPartsApp("../test")
 	app2.getSessionValues = func(r *http.Request) (map[string]string, error) {
 		return map[string]string{
 			"twitter": "user11",
@@ -28,7 +28,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		app  *artsPartsApp
+		app  *ArtsPartsApp
 		args args
 		want templateData
 	}{
@@ -73,7 +73,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 func Test_artsPartsApp_artwork(t *testing.T) {
 	// TODO: test is not complete
 	artspartsApp, _ := artsparts.NewApp("../test")
-	app := &artsPartsApp{
+	app := &ArtsPartsApp{
 		artsparts: artspartsApp,
 		getSessionValues: func(r *http.Request) (map[string]string, error) {
 			return map[string]string{
@@ -103,7 +103,7 @@ func Test_artsPartsApp_artwork(t *testing.T) {
 	}
 	tests := []struct {
 		name      string
-		app       *artsPartsApp
+		app       *ArtsPartsApp
 		args      args
 		expHeader int
 	}{
@@ -134,7 +134,7 @@ func Test_artsPartsApp_artwork(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.app.artwork(tt.args.w, tt.args.r)
+			tt.app.Artwork(tt.args.w, tt.args.r)
 			if tt.expHeader != tt.args.w.Result().StatusCode {
 				t.Error("Wrong return code")
 			}

@@ -10,17 +10,17 @@ import (
 )
 
 func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
-	app, _ := newArtsPartsApp("../test")
-	app.getSessionValues = func(r *http.Request) (map[string]string, error) {
+	app, _ := NewArtsPartsApp("../test")
+	app.getSessionValues = func(r *http.Request) map[string]string {
 		return map[string]string{
 			"twitter": "user1",
-		}, nil
+		}
 	}
-	app2, _ := newArtsPartsApp("../test")
-	app2.getSessionValues = func(r *http.Request) (map[string]string, error) {
+	app2, _ := NewArtsPartsApp("../test")
+	app2.getSessionValues = func(r *http.Request) map[string]string {
 		return map[string]string{
 			"twitter": "user11",
-		}, nil
+		}
 	}
 
 	type args struct {
@@ -28,43 +28,45 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		app  *artsPartsApp
+		app  *ArtsPartsApp
 		args args
-		want templateData
+		want TemplateData
 	}{
 		{
 			"Admin user",
 			app,
-			args{nil},
-			templateData{
-				JSFiles:  []string{"app.js"},
-				CSSFiles: []string{"custom.css"},
+			args{&http.Request{}},
+			TemplateData{
+				JSFiles:  []string{"/lib/app.js"},
+				CSSFiles: []string{"/lib/custom.css"},
 				JQuery:   true,
 				VueJS:    false,
 				Title:    "artsparts",
 				User:     "user1",
+				Vars:     map[string]string{},
 				Admin:    true,
 			},
 		},
 		{
 			"Normal user",
 			app2,
-			args{nil},
-			templateData{
-				JSFiles:  []string{"app.js"},
-				CSSFiles: []string{"custom.css"},
+			args{&http.Request{}},
+			TemplateData{
+				JSFiles:  []string{"/lib/app.js"},
+				CSSFiles: []string{"/lib/custom.css"},
 				JQuery:   true,
 				VueJS:    false,
 				Title:    "artsparts",
 				User:     "user11",
+				Vars:     map[string]string{},
 				Admin:    false,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.app.defaultTemplateData(tt.args.r); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("artsPartsApp.defaultTemplateData() = \n%#v, want \n%#v", got, tt.want)
+			if got := tt.app.defaultTemplateData(tt.args.r); !reflect.DeepEqual(*got, tt.want) {
+				t.Errorf("artsPartsApp.defaultTemplateData() = \n%#v, want \n%#v", *got, tt.want)
 			}
 		})
 	}
@@ -73,12 +75,12 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 func Test_artsPartsApp_artwork(t *testing.T) {
 	// TODO: test is not complete
 	artspartsApp, _ := artsparts.NewApp("../test")
-	app := &artsPartsApp{
+	app := &ArtsPartsApp{
 		artsparts: artspartsApp,
-		getSessionValues: func(r *http.Request) (map[string]string, error) {
+		getSessionValues: func(r *http.Request) map[string]string {
 			return map[string]string{
 				"twitter": "user1",
-			}, nil
+			}
 		},
 		muxVars: func(r *http.Request) map[string]string {
 			// Using RequestURI to mock the different outputs
@@ -103,7 +105,7 @@ func Test_artsPartsApp_artwork(t *testing.T) {
 	}
 	tests := []struct {
 		name      string
-		app       *artsPartsApp
+		app       *ArtsPartsApp
 		args      args
 		expHeader int
 	}{
@@ -134,7 +136,7 @@ func Test_artsPartsApp_artwork(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.app.artwork(tt.args.w, tt.args.r)
+			tt.app.Artwork(tt.args.w, tt.args.r)
 			if tt.expHeader != tt.args.w.Result().StatusCode {
 				t.Error("Wrong return code")
 			}

@@ -11,10 +11,10 @@
   {{- end}}
 
 <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.js" integrity="sha256-97Q90i72uoJfYtVnO2lQcLjbjBySZjLHx50DYhCBuJo=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.js"></script>
+ 
 
   {{range .JSFiles}}
-    <script src="/lib/{{.}}"></script>
+    <script src="{{.}}"></script>
   {{- end}}
 </body>
 

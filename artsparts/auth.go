@@ -103,17 +103,17 @@ func authCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
-func getSessionValues(r *http.Request) (map[string]string, error) {
+func getSessionValues(r *http.Request) map[string]string {
 	session, err := gothic.Store.Get(r, sessionName)
 	if err != nil {
-		return nil, errors.Wrap(err, "getSessionValues fails")
+		log.Error(errors.WithStack(err))
 	}
 	vals := make(map[string]string)
 	vals["userid"] = getString("userid", session.Values)
 	vals["twitter"] = getString("twitter", session.Values)
 	vals["access_token"] = getString("access_token", session.Values)
 	vals["access_token_secret"] = getString("access_token_secret", session.Values)
-	return vals, nil
+	return vals
 }
 
 func getString(key string, m map[interface{}]interface{}) string {

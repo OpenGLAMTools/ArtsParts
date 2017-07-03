@@ -1,11 +1,7 @@
 {{ define "timeline"}}
+{{ template "head" .}}
 <div class="ui stackable three column grid container">
-    <div class="row">
-        {{ template "head" .}}
-        <br><br>
-    </div>
-
-
+    <div class="ui hidden divider"></div>
     <div class="row">
         <h1>Timeline</h1>
     </div>
@@ -13,7 +9,7 @@
     <div class="ui divided items">
         {{range .Timeline}}
         <div class="item">
-            <a class="ui medium image">
+            <a href="/editor{{.URIPath}}" class="ui medium image">
                 <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}" />
             </a>
 
@@ -34,10 +30,10 @@
                 <i class="twitter icon"></i>
                 24 ArtPart Tweet
                 </a>
-                    <div class="ui right floated primary button">
+                    <a href="/editor{{.URIPath}}" class="ui right floated primary button">
                         ArtPart erstellen
                         <i class="right paint brush icon"></i>
-                    </div>
+                    </a>
                 </div>
             </div>
 

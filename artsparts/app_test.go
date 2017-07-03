@@ -30,15 +30,15 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 		name string
 		app  *ArtsPartsApp
 		args args
-		want templateData
+		want TemplateData
 	}{
 		{
 			"Admin user",
 			app,
 			args{&http.Request{}},
-			templateData{
-				JSFiles:  []string{"app.js"},
-				CSSFiles: []string{"custom.css"},
+			TemplateData{
+				JSFiles:  []string{"/lib/app.js"},
+				CSSFiles: []string{"/lib/custom.css"},
 				JQuery:   true,
 				VueJS:    false,
 				Title:    "artsparts",
@@ -51,9 +51,9 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 			"Normal user",
 			app2,
 			args{&http.Request{}},
-			templateData{
-				JSFiles:  []string{"app.js"},
-				CSSFiles: []string{"custom.css"},
+			TemplateData{
+				JSFiles:  []string{"/lib/app.js"},
+				CSSFiles: []string{"/lib/custom.css"},
 				JQuery:   true,
 				VueJS:    false,
 				Title:    "artsparts",
@@ -65,8 +65,8 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.app.defaultTemplateData(tt.args.r); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("artsPartsApp.defaultTemplateData() = \n%#v, want \n%#v", got, tt.want)
+			if got := tt.app.defaultTemplateData(tt.args.r); !reflect.DeepEqual(*got, tt.want) {
+				t.Errorf("artsPartsApp.defaultTemplateData() = \n%#v, want \n%#v", *got, tt.want)
 			}
 		})
 	}

@@ -3,8 +3,12 @@
 <div class="ui container">
 <h1>Editor</h1>
 {{.Vars.artwork}}
-<img src="/img/{{.Vars.institution}}/{{.Vars.collection}}/{{.Vars.artwork}}?size=massive" />
-<div id="editor"></div>
+{{.Artwork.URIPath}}
+<img  src="/img/{{.Artwork.URIPath}}?size=medium" />
+<div>
+<img id="croppieimg" src="/img/{{.Artwork.URIPath}}?size=huge" />
+</div>
+
 </div>
 {{ template "foot" .}}
 {{end}}

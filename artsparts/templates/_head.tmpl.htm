@@ -13,10 +13,10 @@
   <title>{{.Title}}</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.css" integrity="sha256-5+W3JHnvGYIJkVxUBsw+jBi9+pOlu9enPX3vZapXj5M=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.css" />
+  
 
 {{range .CSSFiles}}
-  <link href="/lib/{{.}}" rel="stylesheet">
+  <link href="{{.}}" rel="stylesheet">
 {{- end}}
 </head>
 

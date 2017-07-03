@@ -34,7 +34,7 @@ func NewArtsPartsApp(fpath string) (*ArtsPartsApp, error) {
 	return app, nil
 }
 
-func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) templateData {
+func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 	values := app.getSessionValues(r)
 
 	admInst := app.artsparts.AdminInstitutions(values["twitter"])
@@ -46,9 +46,9 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) templateData {
 	if vars == nil {
 		vars = make(map[string]string)
 	}
-	return templateData{
-		JSFiles:  []string{"app.js"},
-		CSSFiles: []string{"custom.css"},
+	return &TemplateData{
+		JSFiles:  []string{"/lib/app.js"},
+		CSSFiles: []string{"/lib/custom.css"},
 		JQuery:   true,
 		VueJS:    false,
 		Title:    "artsparts",
@@ -87,7 +87,7 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 	// page individual configuration
 	switch page {
 	case "admin":
-		data.JSFiles = append(data.JSFiles, "admin.js")
+		data.AddJS("/lib/admin.js")
 		data.VueJS = true
 	}
 	app.executeTemplate(w, page, data)
@@ -122,6 +122,7 @@ func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		w.WriteHeader(404)
 		w.Write([]byte("Artwork not found"))
+		return
 	}
 	imgFile, err := artw.ImgFile()
 	if err != nil {
@@ -132,6 +133,7 @@ func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		w.Write([]byte("Can not load image"))
 		log.Error("can not load image file", err)
+		return
 	}
 	switch size {
 	case "small":
@@ -199,7 +201,26 @@ func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
 	collID := vars["collection"]
 	artwID := vars["artwork"]*/
 	data := app.defaultTemplateData(r)
-	app.executeTemplate(w, "editor", data)
+	data.AddCSS("https://cdnjs.cloudflare.com/ajax/libs/croppie/2.4.1/croppie.min.css")
+	data.AddJS("https://cdnjs.cloudflare.com/ajax/libs/croppie/2.4.1/croppie.min.js")
+	data.AddJS("/lib/editor.js")
+
+	instID := data.Vars["institution"]
+	collID := data.Vars["collection"]
+	artwID := data.Vars["artwork"]
+	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
+	if !ok {
+		w.WriteHeader(404)
+		w.Write([]byte("Artwork not found"))
+	}
+	tmplData := struct {
+		*TemplateData
+		Artwork *artsparts.Artwork
+	}{
+		data,
+		artw,
+	}
+	app.executeTemplate(w, "editor", tmplData)
 
 }
 
@@ -208,7 +229,8 @@ func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// AdminInstitutions is the handlefunc for the admin page, which is a onepage app
+// AdminInstitutions is the rest api for serving the insitutions where the user is
+// admin
 func (app *ArtsPartsApp) AdminInstitutions(w http.ResponseWriter, r *http.Request) {
 	session := app.getSessionValues(r)
 

@@ -2,7 +2,8 @@ package main
 
 import artsparts "github.com/OpenGLAMTools/ArtsParts"
 
-type templateData struct {
+// TemplateData defines the default values for the templates
+type TemplateData struct {
 	JSFiles  []string
 	CSSFiles []string
 	JQuery   bool
@@ -12,4 +13,14 @@ type templateData struct {
 	Admin    bool
 	Vars     map[string]string
 	Timeline []*artsparts.Artwork
+}
+
+// AddJS adds a string to the JSFiles
+func (td *TemplateData) AddJS(s string) {
+	td.JSFiles = append(td.JSFiles, s)
+}
+
+// AddCSS adds a string to the CSSFiles
+func (td *TemplateData) AddCSS(s string) {
+	td.CSSFiles = append(td.CSSFiles, s)
 }

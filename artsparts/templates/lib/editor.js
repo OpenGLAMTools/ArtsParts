@@ -26,7 +26,7 @@ var app = new Vue({
    delimiters: ['[[', ']]'],
     el: '#editor',
     data: {
-        tweettext: "abc"
+        tweettext: "@OpenArtsParts"
     },
     computed: {
         charsRemain: function () {

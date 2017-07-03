@@ -1,14 +1,52 @@
-{{ define "editor"}}
-{{ template "head" .}}
-<div class="ui container">
-<h1>Editor</h1>
-{{.Vars.artwork}}
-{{.Artwork.URIPath}}
-<img  src="/img/{{.Artwork.URIPath}}?size=medium" />
-<div>
-<img id="croppieimg" src="/img/{{.Artwork.URIPath}}?size=huge" />
-</div>
+{{ define "editor"}} {{ template "head" .}}
 
-</div>
-{{ template "foot" .}}
-{{end}}
+<div id="editor" class="ui stackable two column grid container">
+    <div class="row">
+        <br>
+        <h2>Editor - {{.Artwork.Name}}</h2>
+    </div>
+
+    <div class="column">
+        <div class="ui large image">
+            <img id="image" src="/img{{.Artwork.URIPath}}?size=huge">
+        </div>
+    </div>
+    <div class="column">
+        <div class="ui form warning">
+            <div class="ui warning message">
+                <div class="header">Anleitung</div>
+                <p></p>
+                <ul class="list">
+                    <li>Durch zoomen und verschieben des Bildes wird der helle Bereich als Bild getwittert.</li>
+                    <li>Alles was Du hier twitterst bekommen auch Deine Follower mit</li>
+                    <li>Mit "Twittern" best&auml;tigst Du Deine Eingabe und ein Tweet mit Deinem ArtPart wird erzeugt. Wichtig:
+                        Der Tweet wird &uuml;ber Deinen Twitter Account abgeschickt.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="ui hidden divider"></div>
+        <div class="ui form">
+            <div class="field">
+                <label>Dein ArtPart Tweet</label>
+                <textarea v-model="tweettext" rows="2"></textarea>
+            </div>
+            <p>Verbleibende Zeichen: [[charsRemain]]</p>
+
+            <div v-if="tooMuchChars" class="ui orange icon message">
+                <i class="warning sign icon"></i>
+                <div class="content">
+                    <p>Achtung zu viele Zeichen verwendet. Dein Tweet wird nach 140 Zeichen automatisch abgeschnitten!</p>
+                </div>
+            </div>
+            <button class="ui left labeled icon button">
+            <i class="remove circle icon"></i>
+            Abbrechen
+            </button>
+            <button class="ui right labeled icon primary button">
+            <i class="twitter icon"></i>
+            Twittern
+            </button>
+        </div>
+    </div>
+
+    {{ template "foot" .}} {{end}}

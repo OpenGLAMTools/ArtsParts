@@ -6,5 +6,6 @@ $(document).ready(function () {
     $('.openmodal').click(function(){
         $('.ui.modal').modal('show');
     });
- 
+    
+   
 });

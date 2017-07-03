@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -27,9 +28,9 @@ func NewArtsPartsApp(fpath string) (*ArtsPartsApp, error) {
 		return nil, err
 	}
 	app := &ArtsPartsApp{
-		apApp,
-		mux.Vars,
-		getSessionValues,
+		artsparts:        apApp,
+		muxVars:          mux.Vars,
+		getSessionValues: getSessionValues,
 	}
 	return app, nil
 }
@@ -59,7 +60,9 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 }
 
 func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, data interface{}) {
-	tmpl, err := template.ParseGlob("templates/*.tmpl.htm")
+	funcMap := make(template.FuncMap)
+	funcMap["vue"] = func(s string) string { return fmt.Sprintf("{{%s}}", s) }
+	tmpl, err := template.New("").Funcs(funcMap).ParseGlob("templates/*.tmpl.htm")
 	if err != nil {
 		log.Error("app.executeTemplate: error when parse glob: ", err)
 	}
@@ -201,9 +204,11 @@ func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
 	collID := vars["collection"]
 	artwID := vars["artwork"]*/
 	data := app.defaultTemplateData(r)
-	data.AddCSS("https://cdnjs.cloudflare.com/ajax/libs/croppie/2.4.1/croppie.min.css")
-	data.AddJS("https://cdnjs.cloudflare.com/ajax/libs/croppie/2.4.1/croppie.min.js")
+	data.AddCSS("https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.css")
+	data.AddJS("https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.js")
 	data.AddJS("/lib/editor.js")
+	// enable vuejs here
+	data.VueJS = true
 
 	instID := data.Vars["institution"]
 	collID := data.Vars["collection"]

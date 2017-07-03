@@ -39,7 +39,8 @@ func TestAppRoutes(t *testing.T) {
 		{"/img/inst1/coll1/pic1?size=massive", 200, ""},
 		{"/img/inst1/coll123/pic1", 404, ""},
 		{"/img/inst1/coll1/pic123", 404, ""},
-		{"/editor/inst1/coll1/pic1", 200, "croppie.min.js"},
+		{"/editor/inst1/coll1/pic1", 200, "cropper.js"},
+		{"/editor/inst1/coll1/pic1", 200, "https://unpkg.com/vue"},
 	}
 
 	for _, tt := range tests {

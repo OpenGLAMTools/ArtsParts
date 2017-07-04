@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
@@ -142,4 +143,40 @@ func Test_artsPartsApp_artwork(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDafultFuncMap(t *testing.T) {
+	app, _ := NewArtsPartsApp("../test")
+	fm := app.defaultFuncMap()
+	vue := fm["vue"].(func(string) string)("abc")
+	exp := "{{abc}}"
+	if vue != exp {
+		t.Errorf("Got: %s\nExp: %s\n", vue, exp)
+	}
+	tests := []struct {
+		ts        string
+		layout    string
+		expError  bool
+		expString string
+	}{
+		{
+			"201301241155",
+			"15:04 02.01.2006",
+			false,
+			"11:55 24.01.2013",
+		},
+		{
+			"20130124115599",
+			"15:04 02.01.2006",
+			true,
+			"",
+		},
+	}
+	for _, tt := range tests {
+		tstring, err := fm["formatTS"].(func(string, string) (string, error))(tt.ts, tt.layout)
+		assert.Equal(t, tstring, tt.expString)
+
+		assert.Equal(t, tt.expError, err != nil)
+	}
+
 }

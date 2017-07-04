@@ -21,6 +21,10 @@ const ConfFileName = "conf.yml"
 // DataFileName defines the filename where data is stored.
 const DataFileName = "data.json"
 
+// TimeStampLayout defines the time layout string for the
+// timestamp
+const TimneStampLayout = "200601021504"
+
 // Institutions holds the complete logic of the artsparts site.
 // The insitutions are organized over a slice.
 type Institutions []*Institution

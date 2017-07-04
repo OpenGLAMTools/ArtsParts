@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
@@ -58,10 +59,26 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 		Admin:    isAdmin,
 	}
 }
-
-func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, data interface{}) {
+func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
 	funcMap := make(template.FuncMap)
 	funcMap["vue"] = func(s string) string { return fmt.Sprintf("{{%s}}", s) }
+	formatTS := func(ts, layout string) (string, error) {
+		t, err := time.Parse(artsparts.TimneStampLayout, ts)
+		if err != nil {
+			return "", err
+		}
+		return t.Format(layout), nil
+	}
+	funcMap["formatTS"] = formatTS
+	funcMap["tsToDateTime"] = func(s string) string {
+		dt, _ := formatTS(s, "15:04 02.01.2006")
+		return dt
+	}
+	return funcMap
+}
+
+func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, data interface{}) {
+	funcMap := app.defaultFuncMap()
 	tmpl, err := template.New("").Funcs(funcMap).ParseGlob("templates/*.tmpl.htm")
 	if err != nil {
 		log.Error("app.executeTemplate: error when parse glob: ", err)

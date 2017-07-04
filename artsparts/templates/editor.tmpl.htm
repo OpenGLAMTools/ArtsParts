@@ -10,12 +10,23 @@
         <div class="ui large image">
             <img id="image" src="/img{{.Artwork.URIPath}}?size=huge">
         </div>
+        <div class="ui hidden divider"></div>
+        <div class="ui center aligned">
+            <button v-on:click="zoomIn" class="ui primary labeled icon button">
+            <i class="zoom icon"></i>
+            Zoom in
+            </button>
+             <button v-on:click="zoomOut" class="ui primary right labeled icon button">
+            <i class="zoom out icon"></i>
+            Zoom out
+            </button>
+        </div>
     </div>
     <div class="column">
         <div class="ui form warning">
             <div class="ui warning message">
                 <div class="header">Anleitung</div>
-                <p></p>
+               
                 <ul class="list">
                     <li>Durch zoomen und verschieben des Bildes wird der helle Bereich als Bild getwittert.</li>
                     <li>Alles was Du hier twitterst bekommen auch Deine Follower mit</li>
@@ -48,5 +59,5 @@
             </button>
         </div>
     </div>
-
-    {{ template "foot" .}} {{end}}
+</div>
+{{ template "foot" .}} {{end}}

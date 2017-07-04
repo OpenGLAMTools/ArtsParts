@@ -3,6 +3,7 @@ package artsparts
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"sort"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
+	"github.com/disintegration/imaging"
 	"github.com/pkg/errors"
 
 	"gopkg.in/yaml.v2"
@@ -309,6 +311,29 @@ func (artw *Artwork) ImgFile() (string, error) {
 		}
 	}
 	return "", errors.New("No image file found")
+}
+
+// Artpart creates the part of the artwork. Every number is relative to the size
+// of the picture. To get the x value in pixel you need to multiply it to the width
+func (artw *Artwork) Artpart(x, y, width, height float64) (image.Image, error) {
+	f, err := artw.ImgFile()
+	if err != nil {
+		return nil, err
+	}
+	img, err := imaging.Open(f)
+	if err != nil {
+		return nil, err
+	}
+	bounds := img.Bounds()
+	imgWidth := float64(bounds.Max.X)
+	imgHeigth := float64(bounds.Max.Y)
+	rect := image.Rect(
+		int(x*imgWidth),
+		int(y*imgHeigth),
+		int((x+width)*imgWidth),
+		int((y+height)*imgHeigth))
+	artp := imaging.Crop(img, rect)
+	return artp, nil
 }
 
 // WriteData writes the artw into a file. If the

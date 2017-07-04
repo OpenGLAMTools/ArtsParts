@@ -71,7 +71,7 @@ func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
 	}
 	funcMap["formatTS"] = formatTS
 	funcMap["tsToDateTime"] = func(s string) string {
-		dt, _ := formatTS(s, "15:04 02.01.2006")
+		dt, _ := formatTS(s, "02.01.2006 15:04")
 		return dt
 	}
 	return funcMap
@@ -248,7 +248,7 @@ func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
 
 // Artpart serves the json api for tweeting a created artpart
 func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
-
+	// TODO
 }
 
 // AdminInstitutions is the rest api for serving the insitutions where the user is

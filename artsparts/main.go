@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/OpenGLAMTools/ArtsParts/shortlink"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 )
@@ -26,6 +27,7 @@ func main() {
 	r.HandleFunc("/tweet", postTweetHandler)
 	// Auth routes
 	// /auth/twitter
+	r = shortlink.AddRoute(r)
 	r = addAuthRoutes(r)
 	r = addAppRoutes(r, conf.SourceFolder)
 

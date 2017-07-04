@@ -47,11 +47,14 @@ func GetID(url string) (int, error) {
 	return l.ID, errors.WithStack(err)
 }
 
+// AddRoute adds the redirect route to a mux router. The logic here is that
+// just the id is part of the url after the URIPrefix
 func AddRoute(r *mux.Router) *mux.Router {
 	r.HandleFunc(URIPrefix+"/{id}", Redirect)
 	return r
 }
 
+// Redirect is the handler, which needs the id inside the mux.Route
 func Redirect(w http.ResponseWriter, r *http.Request) {
 	db, err := storm.Open(DbFile)
 	if err != nil {

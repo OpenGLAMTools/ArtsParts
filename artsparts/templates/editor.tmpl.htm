@@ -23,10 +23,10 @@
         </div>
     </div>
     <div class="column">
+        {{with .User}}
         <div class="ui form warning">
             <div class="ui warning message">
                 <div class="header">Anleitung</div>
-               
                 <ul class="list">
                     <li>Durch zoomen und verschieben des Bildes wird der helle Bereich als Bild getwittert.</li>
                     <li>Alles was Du hier twitterst bekommen auch Deine Follower mit</li>
@@ -35,6 +35,18 @@
                 </ul>
             </div>
         </div>
+        {{else}}
+        <div class="ui form error">
+            <div class="ui error message">
+                <div class="header">Achtung nicht angemeldet!</div>
+                <ul class="list">
+                    <li>Um einen ArtPart tweeten zu k&ouml;nnen, musst Du mit Deinem Twitter account angemeldet sein.</li>
+                    <li>Klicke oben rechts auf "Mit Twitter anmelden"</li>
+                    <li>Ansonsten kannst Du hier schon mal ausprobieren, wie das hier funktioniert.</li>
+                </ul>
+            </div>
+        </div>
+        {{end}}
         <div class="ui hidden divider"></div>
         <div class="ui form">
             <div class="field">
@@ -49,6 +61,7 @@
                     <p>Achtung zu viele Zeichen verwendet. Dein Tweet wird nach 140 Zeichen automatisch abgeschnitten!</p>
                 </div>
             </div>
+            {{ with .User}}
             <button class="ui left labeled icon button">
             <i class="remove circle icon"></i>
             Abbrechen
@@ -57,6 +70,7 @@
             <i class="twitter icon"></i>
             Twittern
             </button>
+            {{end}}
         </div>
     </div>
 </div>

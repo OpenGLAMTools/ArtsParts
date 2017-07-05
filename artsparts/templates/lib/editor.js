@@ -3,26 +3,38 @@ $(document).ready(function () {
         delimiters: ['[[', ']]'],
         el: '#editor',
         data: {
-            tweettext: "@OpenArtsParts",
-            apx: 0,
-            apy: 0,
-            apwidth: 0,
-            apheight: 0
+            artpart: {
+                tweettext: "@OpenArtsParts",
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0
+            }
         },
         computed: {
             charsRemain: function () {
-                return 140 - this.tweettext.length
+                return 140 - this.artpart.tweettext.length
             },
             tooMuchChars: function () {
-                return (140 < this.tweettext.length)
+                return (140 < this.artpart.tweettext.length)
             }
         },
-        methods:{
-            zoomIn: function(){
-                 $('#image').cropper('zoom',0.25);
+        methods: {
+            zoomIn: function () {
+                $('#image').cropper('zoom', 0.25);
             },
-            zoomOut: function(){
-                 $('#image').cropper('zoom',-0.25);
+            zoomOut: function () {
+                $('#image').cropper('zoom', -0.25);
+            },
+            createArtpart: function () {
+                this.$http.post('/artpart' + URIPath, this.artpart).then(response => {
+                    //$('#artworkedit').modal('hide')
+                    // success callback
+                    console.log("Artwork is safed");
+                }, response => {
+                    // error callback
+                     console.log("There was an error");
+                });
             }
         }
     })
@@ -39,20 +51,11 @@ $(document).ready(function () {
             cdata = $('#image').cropper('getCanvasData');
             w = cdata.naturalWidth;
             h = cdata.naturalHeight;
-            app.apx = e.x / w;
-            app.apy = e.y / h;
-            app.apwidth = e.width / w;
-            app.apheight = e.height / h;
-            console.log("---------")
-            console.log(e.x);
-            console.log("--> " + e.x / cdata.naturalWidth);
-            console.log(e.y);
-            console.log("--> " + e.y / cdata.naturalHeight);
-            console.log(e.width);
-            console.log(e.height);
-            console.log(e.rotate);
-            console.log(e.scaleX);
-            console.log(e.scaleY);
+            app.artpart.x = e.x / w;
+            app.artpart.y = e.y / h;
+            app.artpart.width = e.width / w;
+            app.artpart.height = e.height / h;
+            
         }
     });
 });

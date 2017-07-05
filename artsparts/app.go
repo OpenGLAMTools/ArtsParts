@@ -226,15 +226,7 @@ func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
 	data.AddJS("/lib/editor.js")
 	// enable vuejs here
 	data.VueJS = true
-
-	instID := data.Vars["institution"]
-	collID := data.Vars["collection"]
-	artwID := data.Vars["artwork"]
-	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
-	if !ok {
-		w.WriteHeader(404)
-		w.Write([]byte("Artwork not found"))
-	}
+	artw := app.artworkFromVars(data.Vars, w)
 	tmplData := struct {
 		*TemplateData
 		Artwork *artsparts.Artwork
@@ -248,7 +240,44 @@ func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
 
 // Artpart serves the json api for tweeting a created artpart
 func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	data := app.defaultTemplateData(r)
+	if data.User == "" {
+		w.WriteHeader(401)
+		w.Write([]byte("Unauthorized"))
+		return
+	}
+	rbody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error("artpart: error reading from body", err)
+		return
+	}
+	fmt.Println(string(rbody))
+	ap := &artsparts.Part{}
+	err = json.Unmarshal(rbody, ap)
+	fmt.Println(ap)
+	if err != nil {
+		log.Error("artpart: error unmarshaling body", err)
+		return
+	}
+	artw := app.artworkFromVars(data.Vars, w)
+	img, err := artw.Artpart(ap.X, ap.Y, ap.Width, ap.Height)
+	if err != nil {
+		log.Error("artpart: error creating artpart image", err)
+		return
+	}
+	imaging.Save(img, "artpart.jpg")
+}
+
+func (app *ArtsPartsApp) artworkFromVars(vars map[string]string, w http.ResponseWriter) *artsparts.Artwork {
+	instID := vars["institution"]
+	collID := vars["collection"]
+	artwID := vars["artwork"]
+	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
+	if !ok {
+		w.WriteHeader(404)
+		w.Write([]byte("Artwork not found"))
+	}
+	return artw
 }
 
 // AdminInstitutions is the rest api for serving the insitutions where the user is

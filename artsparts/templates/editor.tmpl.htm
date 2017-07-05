@@ -51,7 +51,7 @@
         <div class="ui form">
             <div class="field">
                 <label>Dein ArtPart Tweet</label>
-                <textarea v-model="tweettext" rows="2"></textarea>
+                <textarea v-model="artpart.tweettext" rows="2"></textarea>
             </div>
             <p>Verbleibende Zeichen: [[charsRemain]]</p>
 
@@ -66,7 +66,7 @@
             <i class="remove circle icon"></i>
             Abbrechen
             </button>
-            <button class="ui right labeled icon primary button">
+            <button v-on:click="createArtpart" class="ui right labeled icon primary button">
             <i class="twitter icon"></i>
             Twittern
             </button>
@@ -74,4 +74,7 @@
         </div>
     </div>
 </div>
+<script>
+const URIPath = "{{.Artwork.URIPath}}";
+</script>
 {{ template "foot" .}} {{end}}

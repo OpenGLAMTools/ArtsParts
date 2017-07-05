@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/ChimeraCoder/anaconda"
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/disintegration/imaging"
@@ -57,6 +58,7 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 		User:     values["twitter"],
 		Vars:     vars,
 		Admin:    isAdmin,
+		Session:  values,
 	}
 }
 func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
@@ -265,7 +267,17 @@ func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
 		log.Error("artpart: error creating artpart image", err)
 		return
 	}
-	imaging.Save(img, "artpart.jpg")
+	twitterAPI := anaconda.NewTwitterApi(
+		data.Session["access_token"],
+		data.Session["access_token_secret"],
+	)
+	err = postTweet(ap.Text, img, twitterAPI)
+	if err != nil {
+		log.Error("artpart: error post tweet", err)
+		return
+	}
+
+	//imaging.Save(img, "artpart.jpg")
 }
 
 func (app *ArtsPartsApp) artworkFromVars(vars map[string]string, w http.ResponseWriter) *artsparts.Artwork {

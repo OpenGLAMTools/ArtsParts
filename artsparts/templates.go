@@ -13,6 +13,7 @@ type TemplateData struct {
 	Admin    bool
 	Vars     map[string]string
 	Timeline []*artsparts.Artwork
+	Session  map[string]string
 }
 
 // AddJS adds a string to the JSFiles

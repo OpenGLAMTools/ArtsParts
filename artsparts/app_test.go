@@ -46,6 +46,9 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 				User:     "user1",
 				Vars:     map[string]string{},
 				Admin:    true,
+				Session: map[string]string{
+					"twitter": "user1",
+				},
 			},
 		},
 		{
@@ -61,6 +64,9 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 				User:     "user11",
 				Vars:     map[string]string{},
 				Admin:    false,
+				Session: map[string]string{
+					"twitter": "user11",
+				},
 			},
 		},
 	}

@@ -1,13 +1,12 @@
 package main
 
 import (
+	"image"
 	"net/http"
 	"net/url"
 
 	"github.com/ChimeraCoder/anaconda"
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
-	"github.com/disintegration/imaging"
-	"github.com/markbates/goth/gothic"
 )
 
 func initTwitter() {
@@ -15,26 +14,23 @@ func initTwitter() {
 	anaconda.SetConsumerSecret(getenv("TWITTER_SECRET"))
 }
 func postTweetHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := gothic.Store.Get(r, sessionName)
-	if err != nil {
-		log.Warningln("Error when calling session get():", err)
-	}
-	accesToken := session.Values["access_token"].(string)
-	accesTokenSecret := session.Values["access_token_secret"].(string)
-	twitterAPI := anaconda.NewTwitterApi(
-		accesToken,
-		accesTokenSecret,
-	)
-	err = postTweet("Text...", "../test/test.jpg", twitterAPI)
-	if err != nil {
-		log.Warningln("Error when tweeting: ", err)
-	}
+	/*	session, err := gothic.Store.Get(r, sessionName)
+		if err != nil {
+			log.Warningln("Error when calling session get():", err)
+		}
+		accesToken := session.Values["access_token"].(string)
+		accesTokenSecret := session.Values["access_token_secret"].(string)
+		twitterAPI := anaconda.NewTwitterApi(
+			accesToken,
+			accesTokenSecret,
+		)
+		err = postTweet("Text...", "../test/test.jpg", twitterAPI)
+		if err != nil {
+			log.Warningln("Error when tweeting: ", err)
+		}*/
 }
-func postTweet(text, imagePath string, twitterAPI *anaconda.TwitterApi) error {
-	img, err := imaging.Open(imagePath)
-	if err != nil {
-		return err
-	}
+func postTweet(text string, img image.Image, twitterAPI *anaconda.TwitterApi) error {
+
 	imgString, err := artsparts.ImageToBaseString(img)
 	if err != nil {
 		return err

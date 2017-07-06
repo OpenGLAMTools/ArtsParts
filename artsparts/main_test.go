@@ -11,9 +11,9 @@ import (
 )
 
 func TestAppRoutes(t *testing.T) {
-
+	conf, _ := loadConf("default.conf.yml")
 	router := mux.NewRouter()
-	router = addAppRoutes(router, "../test")
+	router = addAppRoutes(router, conf)
 	ts := httptest.NewServer(router)
 	tests := []struct {
 		route         string

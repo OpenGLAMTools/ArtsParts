@@ -15,7 +15,7 @@ func TestParseConf(t *testing.T) {
 	exp := Conf{
 		":3000",
 		"secret_and_long_string",
-		"path/to/src/root",
+		"../test",
 		"http://test.com",
 		5,
 	}

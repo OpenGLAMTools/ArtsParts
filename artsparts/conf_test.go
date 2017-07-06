@@ -16,6 +16,7 @@ func TestParseConf(t *testing.T) {
 		":3000",
 		"secret_and_long_string",
 		"path/to/src/root",
+		"http://test.com",
 		5,
 	}
 	if !reflect.DeepEqual(conf, exp) {

@@ -1,4 +1,5 @@
 server_port: :3000
 session_secret: secret_and_long_string
 source_folder: path/to/src/root
+url: http://test.com
 log_level: 5

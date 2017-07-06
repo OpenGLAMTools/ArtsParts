@@ -19,18 +19,20 @@ import (
 // ArtsPartsApp contains all the handlefuncs
 type ArtsPartsApp struct {
 	artsparts        *artsparts.App
+	conf             Conf
 	muxVars          func(r *http.Request) map[string]string
 	getSessionValues func(r *http.Request) map[string]string
 }
 
 // NewArtsPartsApp creates a new app
-func NewArtsPartsApp(fpath string) (*ArtsPartsApp, error) {
-	apApp, err := artsparts.NewApp(fpath)
+func NewArtsPartsApp(conf Conf) (*ArtsPartsApp, error) {
+	apApp, err := artsparts.NewApp(conf.SourceFolder)
 	if err != nil {
 		return nil, err
 	}
 	app := &ArtsPartsApp{
 		artsparts:        apApp,
+		conf:             conf,
 		muxVars:          mux.Vars,
 		getSessionValues: getSessionValues,
 	}
@@ -253,16 +255,16 @@ func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
 		log.Error("artpart: error reading from body", err)
 		return
 	}
-	fmt.Println(string(rbody))
-	ap := &artsparts.Part{}
+	ap := &artsparts.Part{
+		User: data.User,
+	}
 	err = json.Unmarshal(rbody, ap)
-	fmt.Println(ap)
 	if err != nil {
 		log.Error("artpart: error unmarshaling body", err)
 		return
 	}
 	artw := app.artworkFromVars(data.Vars, w)
-	img, err := artw.Artpart(ap.X, ap.Y, ap.Width, ap.Height)
+	img, err := artw.Artpart(ap)
 	if err != nil {
 		log.Error("artpart: error creating artpart image", err)
 		return
@@ -271,56 +273,42 @@ func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
 		data.Session["access_token"],
 		data.Session["access_token_secret"],
 	)
-	err = postTweet(ap.Text, img, twitterAPI)
+	err = postTweet(ap, img, twitterAPI)
 	if err != nil {
 		log.Error("artpart: error post tweet", err)
 		return
 	}
-
+	artw.AddPart(ap)
+	err = artw.WriteData()
+	if err != nil {
+		log.Error("artpart: error WriteData", err)
+		return
+	}
 	//imaging.Save(img, "artpart.jpg")
 }
 
-func (app *ArtsPartsApp) artworkFromVars(vars map[string]string, w http.ResponseWriter) *artsparts.Artwork {
-	instID := vars["institution"]
-	collID := vars["collection"]
-	artwID := vars["artwork"]
-	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
-	if !ok {
-		w.WriteHeader(404)
-		w.Write([]byte("Artwork not found"))
+func (app *ArtsPartsApp) ArtworkPage(w http.ResponseWriter, r *http.Request) {
+	data := app.defaultTemplateData(r)
+	//data.AddJS("https://platform.twitter.com/widgets.js")
+	data.AddJS("/lib/artwork.js")
+	artw := app.artworkFromVars(data.Vars, w)
+	tmplData := struct {
+		*TemplateData
+		Artwork *artsparts.Artwork
+	}{
+		data,
+		artw,
 	}
-	return artw
-}
-
-// AdminInstitutions is the rest api for serving the insitutions where the user is
-// admin
-func (app *ArtsPartsApp) AdminInstitutions(w http.ResponseWriter, r *http.Request) {
-	session := app.getSessionValues(r)
-
-	twitterName := session["twitter"]
-	inss := app.artsparts.AdminInstitutions(twitterName)
-
-	b, err := json.Marshal(inss)
-	if err != nil {
-		log.Error("error marshaling institution", err)
-	}
-	w.Write(b)
+	app.executeTemplate(w, "artwork", tmplData)
 }
 
 // Artwork is the REST api for the AdminInstitution app
-func (app *ArtsPartsApp) Artwork(w http.ResponseWriter, r *http.Request) {
+func (app *ArtsPartsApp) ArtworkData(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
 	vars := app.muxVars(r)
-	instID := vars["institution"]
-	collID := vars["collection"]
-	artwID := vars["artwork"]
 
-	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
-	if !ok {
-		w.WriteHeader(404)
-		w.Write([]byte("Artwork not found"))
-	}
+	artw := app.artworkFromVars(vars, w)
 	switch r.Method {
 	case "POST":
 		session := app.getSessionValues(r)
@@ -352,4 +340,31 @@ func (app *ArtsPartsApp) Artwork(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 	}
 
+}
+
+func (app *ArtsPartsApp) artworkFromVars(vars map[string]string, w http.ResponseWriter) *artsparts.Artwork {
+	instID := vars["institution"]
+	collID := vars["collection"]
+	artwID := vars["artwork"]
+	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
+	if !ok {
+		w.WriteHeader(404)
+		w.Write([]byte("Artwork not found"))
+	}
+	return artw
+}
+
+// AdminInstitutions is the rest api for serving the insitutions where the user is
+// admin
+func (app *ArtsPartsApp) AdminInstitutions(w http.ResponseWriter, r *http.Request) {
+	session := app.getSessionValues(r)
+
+	twitterName := session["twitter"]
+	inss := app.artsparts.AdminInstitutions(twitterName)
+
+	b, err := json.Marshal(inss)
+	if err != nil {
+		log.Error("error marshaling institution", err)
+	}
+	w.Write(b)
 }

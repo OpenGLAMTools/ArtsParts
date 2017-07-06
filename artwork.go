@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
+	"github.com/OpenGLAMTools/ArtsParts/shortlink"
 	"github.com/disintegration/imaging"
 	"github.com/pkg/errors"
 )
@@ -27,6 +28,7 @@ type Artwork struct {
 	Description string `json:"description"`
 	HashTag     string `json:"hashtag"`
 	URIPath     string `json:"-"`
+	ShortLink   string `json:"shortlink"`
 	Parts       []*Part
 	fpath       string
 	collection  *Collection
@@ -56,7 +58,8 @@ func NewArtwork(fpath string, coll *Collection) (*Artwork, error) {
 		return artw, err
 	}
 	artw.URIPath = fmt.Sprintf("/%s/%s/%s", coll.institution.ID, coll.ID, artw.ID)
-	return artw, nil
+	artw.ShortLink, err = shortlink.GetShort("/artwork" + artw.URIPath)
+	return artw, err
 }
 
 // ImgFile return the filename of the image.
@@ -77,9 +80,14 @@ func (artw *Artwork) ImgFile() (string, error) {
 	return "", errors.New("No image file found")
 }
 
+// AddPart adds a Part to the artwork
+func (artw *Artwork) AddPart(p *Part) {
+	artw.Parts = append(artw.Parts, p)
+}
+
 // Artpart creates the part of the artwork. Every number is relative to the size
 // of the picture. To get the x value in pixel you need to multiply it to the width
-func (artw *Artwork) Artpart(x, y, width, height float64) (image.Image, error) {
+func (artw *Artwork) Artpart(p *Part) (image.Image, error) {
 	f, err := artw.ImgFile()
 	if err != nil {
 		return nil, err
@@ -93,10 +101,10 @@ func (artw *Artwork) Artpart(x, y, width, height float64) (image.Image, error) {
 	imgHeigth := float64(bounds.Max.Y)
 
 	rect := image.Rect(
-		int(x*imgWidth),
-		int(y*imgHeigth),
-		int((x+width)*imgWidth),
-		int((y+height)*imgHeigth))
+		int(p.X*imgWidth),
+		int(p.Y*imgHeigth),
+		int((p.X+p.Width)*imgWidth),
+		int((p.Y+p.Height)*imgHeigth))
 	artp := imaging.Crop(img, rect)
 	return artp, nil
 }

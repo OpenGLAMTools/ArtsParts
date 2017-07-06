@@ -75,6 +75,7 @@
     </div>
 </div>
 <script>
-const URIPath = "{{.Artwork.URIPath}}";
+const URIPath = "{{js .Artwork.URIPath}}";
+const PermanentLink = "{{html .Artwork.ShortLink}}";
 </script>
 {{ template "foot" .}} {{end}}

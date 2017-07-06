@@ -9,13 +9,13 @@
     <div class="ui divided items">
         {{range .Timeline}}
         <div class="item">
-            <a href="/editor{{.URIPath}}" class="ui medium image">
+            <div class="ui medium image">
                 <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}" />
-            </a>
+            </div>
 
             <div class="middle aligned content">
 
-                <a class="header">{{.Name}}</a>
+                <a href="/artwork{{.URIPath}}" class="header">{{.Name}}</a>
 
                 <div class="meta">
                     <div class="date">Ver&ouml;ffentlicht {{ tsToDateTime .Timestamp}}</div>
@@ -25,9 +25,9 @@
                     <p>{{.Description}}</p>
                 </div>
                 <div class="extra">
-                    <a>
+                    <a href="/artwork{{.URIPath}}">
                 <i class="twitter icon"></i>
-                24 ArtPart Tweet
+                {{len .Parts}} ArtPart Tweets
                 </a>
                     <a href="/editor{{.URIPath}}" class="ui right floated primary button">
                         ArtPart erstellen

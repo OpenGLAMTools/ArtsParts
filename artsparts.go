@@ -255,6 +255,7 @@ type Part struct {
 	Y       float64 `json:"y"`
 	Width   float64 `json:"width"`
 	Height  float64 `json:"height"`
+	User    string  `json:"user"`
 	TweetID int64   `json:"tweet_id,omitempty"`
 	MediaID int64   `json:"media_id,omitempty"`
 }

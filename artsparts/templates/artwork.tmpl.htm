@@ -1,0 +1,24 @@
+{{ define "artwork"}} 
+{{ template "head" .}}
+
+<div class="ui stackable two column grid container">
+    <div class="ui hidden divider"></div>
+    <div class="row">
+        <h2>{{.Artwork.Name}}</h2>
+    </div>
+
+    <div class="column">
+        <div class="ui large image">
+            <img id="image" src="/img{{.Artwork.URIPath}}?size=huge">
+        </div>
+        
+    </div>
+    <div class="column">
+        {{range .Artwork.Parts}}
+           <div class="tweet" id="{{.TweetID}}"></div>
+        {{end}}
+    </div>
+</div>
+<script sync src="https://platform.twitter.com/widgets.js"></script>
+
+{{ template "foot" .}} {{end}}

@@ -4,7 +4,7 @@ $(document).ready(function () {
         el: '#editor',
         data: {
             artpart: {
-                tweettext: "@OpenArtsParts",
+                tweettext: "#ArtsParts http://artsparts.de"+PermanentLink,
                 x: 0,
                 y: 0,
                 width: 0,

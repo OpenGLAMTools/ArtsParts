@@ -10,6 +10,7 @@ type Conf struct {
 	ServerPort    string `yaml:"server_port,omitempty"`
 	SessionSecret string `yaml:"session_secret,omitempty"`
 	SourceFolder  string `yaml:"source_folder,omitempty"`
+	URL           string `yaml:"url"`
 	LogLevel      uint32 `yaml:"log_level"`
 }
 

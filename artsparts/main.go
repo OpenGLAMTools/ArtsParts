@@ -29,18 +29,21 @@ func main() {
 	// /auth/twitter
 	r = shortlink.AddRoute(r)
 	r = addAuthRoutes(r)
-	r = addAppRoutes(r, conf)
+
+	app, err := NewArtsPartsApp(conf)
+	if err != nil {
+		log.Fatal("error initializing app:", err)
+	}
+	go app.TweetNewArtworks()
+	r = addAppRoutes(r, app)
 
 	log.Infoln("Starting server at: ", conf.ServerPort)
 	log.Fatal(http.ListenAndServe(conf.ServerPort, r))
 
 }
 
-func addAppRoutes(r *mux.Router, conf Conf) *mux.Router {
-	app, err := NewArtsPartsApp(conf)
-	if err != nil {
-		log.Fatal("error initializing app:", err)
-	}
+func addAppRoutes(r *mux.Router, app *ArtsPartsApp) *mux.Router {
+
 	r.HandleFunc("/", app.Timeline)
 	r.HandleFunc("/page/{page}", app.Page)
 	r.HandleFunc("/data/admin", app.AdminInstitutions).Methods("GET")

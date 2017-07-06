@@ -26,6 +26,7 @@ type Artwork struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	TweetID     int64  `json:"tweet"`
 	HashTag     string `json:"hashtag"`
 	URIPath     string `json:"-"`
 	ShortLink   string `json:"shortlink"`

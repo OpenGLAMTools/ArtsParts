@@ -128,6 +128,24 @@ func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 	app.executeTemplate(w, "timeline", data)
 }
 
+// TweetNewArtworks checks if there is an artwork which is new inside the timeline
+func (app *ArtsPartsApp) TweetNewArtworks() {
+	ticker := time.Tick(time.Second * 5)
+	for now := range ticker {
+		tl, err := app.artsparts.GetTimeline("")
+		if err != nil {
+			log.Error("TweetNewArtwork: ", err)
+		}
+		for _, artw := range tl {
+			if artw.TweetID == 0 {
+				log.Info(artw)
+			}
+		}
+		log.Info("Tick:", now)
+	}
+
+}
+
 // Img is the handler for serving the images. The url accepts also different
 // sizes. If size is part of the url the image is resized.
 //   * small 150x150

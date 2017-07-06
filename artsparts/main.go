@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 
 	"github.com/OpenGLAMTools/ArtsParts/shortlink"
@@ -8,12 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var confFile = ".conf.yml"
-
 var log = logrus.New()
 
 func main() {
-	conf, err := loadConf(confFile)
+	confFile := flag.String("conf", ".conf.yml", "Path to the configuration")
+	flag.Parse()
+	conf, err := loadConf(*confFile)
 	if err != nil {
 		log.Fatal("Can not load conf: ", confFile, err)
 	}

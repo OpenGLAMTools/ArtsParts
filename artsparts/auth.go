@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"os"
@@ -24,7 +25,7 @@ func initAuth(conf Conf) {
 		twitter.New(
 			getenv("TWITTER_KEY"),
 			getenv("TWITTER_SECRET"),
-			"http://localhost:3000/auth/twitter/callback"),
+			fmt.Sprintf("%s/auth/twitter/callback", conf.URL)),
 	)
 }
 

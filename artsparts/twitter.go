@@ -13,24 +13,28 @@ func initTwitter() {
 	anaconda.SetConsumerSecret(getenv("TWITTER_SECRET"))
 }
 
-func postTweet(ap *artsparts.Part, img image.Image, twitterAPI *anaconda.TwitterApi) error {
+func postPartTweet(ap *artsparts.Part, img image.Image, twitterAPI *anaconda.TwitterApi) error {
+	twitterID, mediaID, err := tweetImage(ap.Text, img, twitterAPI)
+	ap.TweetID = twitterID
+	ap.MediaID = mediaID
+	return err
+}
 
+func tweetImage(text string, img image.Image, twitterAPI *anaconda.TwitterApi) (twitterID, mediaID int64, err error) {
 	imgString, err := artsparts.ImageToBaseString(img)
 	if err != nil {
-		return err
+		return twitterID, mediaID, err
 	}
 	m, err := twitterAPI.UploadMedia(imgString)
 	if err != nil {
-		return err
+		return twitterID, mediaID, err
 	}
-	ap.MediaID = m.MediaID
+	mediaID = m.MediaID
 	v := url.Values{
 		"media_ids": []string{m.MediaIDString},
 	}
-	tweet, err := twitterAPI.PostTweet(ap.Text, v)
-	if err != nil {
-		return err
-	}
-	ap.TweetID = tweet.Id
-	return nil
+	tweet, err := twitterAPI.PostTweet(text, v)
+	twitterID = tweet.Id
+	return twitterID, mediaID, err
+
 }

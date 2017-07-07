@@ -130,7 +130,7 @@ func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 
 // TweetNewArtworks checks if there is an artwork which is new inside the timeline
 func (app *ArtsPartsApp) TweetNewArtworks() {
-	ticker := time.Tick(time.Second * 5)
+	ticker := time.Tick(time.Second * 30)
 	for now := range ticker {
 		tl, err := app.artsparts.GetTimeline("")
 		if err != nil {
@@ -139,11 +139,41 @@ func (app *ArtsPartsApp) TweetNewArtworks() {
 		for _, artw := range tl {
 			if artw.TweetID == 0 {
 				log.Info(artw)
+				go app.TweetArtwork(artw)
 			}
 		}
+
 		log.Info("Tick:", now)
 	}
+}
 
+// TweetArtwork tweets an artwork
+func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
+	img, err := artw.Image()
+	if err != nil {
+		log.Error("TweeArtwork: artw.Image()", err)
+		return
+	}
+	twitterAPI := anaconda.NewTwitterApi(
+		getenv("ACCESS_TOKEN"),
+		getenv("ACCESS_TOKEN_SECRET"),
+	)
+	twitterID, _, err := tweetImage(
+		fmt.Sprintf("%s %s Neues ArtPart Bild verfügbar. %s",
+			artw.InstitutionTwitter(),
+			artw.HashTag,
+			artw.ShortLink),
+		img,
+		twitterAPI)
+	if err != nil {
+		log.Error("TweetArtwork: tweetImage: ", err)
+		return
+	}
+	artw.TweetID = twitterID
+	err = artw.WriteData()
+	if err != nil {
+		log.Error("TweetArtwork: error writing data: ", err)
+	}
 }
 
 // Img is the handler for serving the images. The url accepts also different
@@ -291,7 +321,7 @@ func (app *ArtsPartsApp) Artpart(w http.ResponseWriter, r *http.Request) {
 		data.Session["access_token"],
 		data.Session["access_token_secret"],
 	)
-	err = postTweet(ap, img, twitterAPI)
+	err = postPartTweet(ap, img, twitterAPI)
 	if err != nil {
 		log.Error("artpart: error post tweet", err)
 		return

@@ -89,11 +89,7 @@ func (artw *Artwork) AddPart(p *Part) {
 // Artpart creates the part of the artwork. Every number is relative to the size
 // of the picture. To get the x value in pixel you need to multiply it to the width
 func (artw *Artwork) Artpart(p *Part) (image.Image, error) {
-	f, err := artw.ImgFile()
-	if err != nil {
-		return nil, err
-	}
-	img, err := imaging.Open(filepath.Join(artw.fpath, f))
+	img, err := artw.Image()
 	if err != nil {
 		return nil, err
 	}
@@ -108,6 +104,15 @@ func (artw *Artwork) Artpart(p *Part) (image.Image, error) {
 		int((p.Y+p.Height)*imgHeigth))
 	artp := imaging.Crop(img, rect)
 	return artp, nil
+}
+
+// Image returns the Image of the artwork
+func (artw *Artwork) Image() (image.Image, error) {
+	f, err := artw.ImgFile()
+	if err != nil {
+		return nil, err
+	}
+	return imaging.Open(filepath.Join(artw.fpath, f))
 }
 
 // WriteData writes the artw into a file. If the
@@ -129,6 +134,11 @@ func (artw *Artwork) Marshal() ([]byte, error) {
 // Path returns the stored path to the artwork as string
 func (artw *Artwork) Path() string {
 	return artw.fpath
+}
+
+// InstitutionTwitter returns the twitter name of the institution
+func (artw *Artwork) InstitutionTwitter() string {
+	return artw.collection.institution.TwitterName
 }
 
 // IsAdminUser returns true, when the given user has admin rights

@@ -145,6 +145,7 @@ type Institution struct {
 	Name        string                 `json:"name" yaml:"name"`
 	Description string                 `json:"description" yaml:"description"`
 	License     string                 `json:"license" yaml:"license"`
+	TwitterName string                 `json:"twittername" yaml:"twitter_name"`
 	Order       int                    `json:"order" yaml:"order"`
 	Collections map[string]*Collection `json:"collections" yaml:"-"`
 	Admins      []string               `json:"admins" yaml:"admins"`

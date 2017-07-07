@@ -159,10 +159,12 @@ func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
 		getenv("ACCESS_TOKEN_SECRET"),
 	)
 	twitterID, _, err := tweetImage(
-		fmt.Sprintf("%s %s Neues ArtPart Bild verfügbar. %s",
+		fmt.Sprintf("%s %s Neues ArtPart Bild verfügbar. %s%s",
 			artw.InstitutionTwitter(),
 			artw.HashTag,
-			artw.ShortLink),
+			app.conf.URL,
+			artw.ShortLink,
+		),
 		img,
 		twitterAPI)
 	if err != nil {

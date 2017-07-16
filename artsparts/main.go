@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/OpenGLAMTools/ArtsParts/shortlink"
 	"github.com/Sirupsen/logrus"
@@ -12,7 +14,15 @@ import (
 var log = logrus.New()
 
 func main() {
-	confFile := flag.String("conf", ".conf.yml", "Path to the configuration")
+	executable, err := os.Executable()
+	if err != nil {
+		log.Fatal("Can not get executable: ", err)
+	}
+	defaultConfPath := filepath.Join(
+		filepath.Dir(executable),
+		".conf.yml",
+	)
+	confFile := flag.String("conf", defaultConfPath, "Path to the configuration")
 	flag.Parse()
 	conf, err := loadConf(*confFile)
 	if err != nil {

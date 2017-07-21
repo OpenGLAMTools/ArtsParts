@@ -22,6 +22,7 @@ type ArtsPartsApp struct {
 	conf             Conf
 	muxVars          func(r *http.Request) map[string]string
 	getSessionValues func(r *http.Request) map[string]string
+	env              map[string]string
 }
 
 // NewArtsPartsApp creates a new app
@@ -35,6 +36,7 @@ func NewArtsPartsApp(conf Conf) (*ArtsPartsApp, error) {
 		conf:             conf,
 		muxVars:          mux.Vars,
 		getSessionValues: getSessionValues,
+		env:              conf.Env,
 	}
 	return app, nil
 }
@@ -155,8 +157,8 @@ func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
 		return
 	}
 	twitterAPI := anaconda.NewTwitterApi(
-		getenv("ACCESS_TOKEN"),
-		getenv("ACCESS_TOKEN_SECRET"),
+		app.env["ACCESS_TOKEN"],
+		app.env["ACCESS_TOKEN_SECRET"],
 	)
 	twitterID, _, err := tweetImage(
 		fmt.Sprintf("%s %s Neues ArtPart Bild verfügbar. %s%s",

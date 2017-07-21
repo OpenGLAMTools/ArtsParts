@@ -30,7 +30,7 @@ func main() {
 	}
 	log.Level = logrus.Level(conf.LogLevel)
 	initAuth(conf)
-	initTwitter()
+	initTwitter(conf)
 
 	r := mux.NewRouter()
 

@@ -3,3 +3,8 @@ session_secret: secret_and_long_string
 source_folder: ../test
 url: http://test.com
 log_level: 5
+env:
+  TWITTER_KEY: KEY123
+  TWITTER_SECRET: SECRET123
+  ACCESS_TOKEN: ACCESS
+  ACCESS_TOKEN_SECRET: ACCESS_SECRET

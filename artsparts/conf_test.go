@@ -18,6 +18,12 @@ func TestParseConf(t *testing.T) {
 		"../test",
 		"http://test.com",
 		5,
+		map[string]string{
+			"TWITTER_KEY":         "KEY123",
+			"TWITTER_SECRET":      "SECRET123",
+			"ACCESS_TOKEN":        "ACCESS",
+			"ACCESS_TOKEN_SECRET": "ACCESS_SECRET",
+		},
 	}
 	if !reflect.DeepEqual(conf, exp) {
 		t.Error("Conf parsing is not correct", exp, conf)

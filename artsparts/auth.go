@@ -23,18 +23,10 @@ func initAuth(conf Conf) {
 	gothic.Store = store
 	goth.UseProviders(
 		twitter.New(
-			getenv("TWITTER_KEY"),
-			getenv("TWITTER_SECRET"),
+			conf.Env["TWITTER_KEY"],
+			conf.Env["TWITTER_SECRET"],
 			fmt.Sprintf("%s/auth/twitter/callback", conf.URL)),
 	)
-}
-
-func getenv(key string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		log.Errorf("No Env value set for %s", key)
-	}
-	return val
 }
 
 func addAuthRoutes(r *mux.Router) *mux.Router {

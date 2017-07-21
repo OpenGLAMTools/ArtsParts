@@ -8,9 +8,9 @@ import (
 	artsparts "github.com/OpenGLAMTools/ArtsParts"
 )
 
-func initTwitter() {
-	anaconda.SetConsumerKey(getenv("TWITTER_KEY"))
-	anaconda.SetConsumerSecret(getenv("TWITTER_SECRET"))
+func initTwitter(conf Conf) {
+	anaconda.SetConsumerKey(conf.Env["TWITTER_KEY"])
+	anaconda.SetConsumerSecret(conf.Env["TWITTER_SECRET"])
 }
 
 func postPartTweet(ap *artsparts.Part, img image.Image, twitterAPI *anaconda.TwitterApi) error {

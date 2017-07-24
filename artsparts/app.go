@@ -69,7 +69,7 @@ func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
 	funcMap := make(template.FuncMap)
 	funcMap["vue"] = func(s string) string { return fmt.Sprintf("{{%s}}", s) }
 	formatTS := func(ts, layout string) (string, error) {
-		t, err := time.Parse(artsparts.TimneStampLayout, ts)
+		t, err := time.Parse(artsparts.TimeStampLayout, ts)
 		if err != nil {
 			return "", err
 		}
@@ -123,7 +123,7 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 	data := app.defaultTemplateData(r)
 	var err error
-	data.Timeline, err = app.artsparts.GetTimeline("")
+	data.Timeline, err = app.artsparts.GetPublishedTimeline("")
 	if err != nil {
 		log.Error("app.timeline: error requesting timeline", err)
 	}
@@ -132,9 +132,9 @@ func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 
 // TweetNewArtworks checks if there is an artwork which is new inside the timeline
 func (app *ArtsPartsApp) TweetNewArtworks() {
-	ticker := time.Tick(time.Second * 30)
+	ticker := time.Tick(time.Minute)
 	for now := range ticker {
-		tl, err := app.artsparts.GetTimeline("")
+		tl, err := app.artsparts.GetPublishedTimeline("")
 		if err != nil {
 			log.Error("TweetNewArtwork: ", err)
 		}
@@ -144,7 +144,6 @@ func (app *ArtsPartsApp) TweetNewArtworks() {
 				go app.TweetArtwork(artw)
 			}
 		}
-
 		log.Info("Tick:", now)
 	}
 }

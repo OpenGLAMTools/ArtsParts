@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"time"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/pkg/errors"
@@ -21,7 +22,8 @@ const DataFileName = "data.json"
 
 // TimeStampLayout defines the time layout string for the
 // timestamp
-const TimneStampLayout = "200601021504"
+//const TimeStampLayout = "200601021504 -0700 MST"
+const TimeStampLayout = "200601021504"
 
 // Institutions holds the complete logic of the artsparts site.
 // The insitutions are organized over a slice.
@@ -115,6 +117,28 @@ func (a *App) GetTimeline(filter string) ([]*Artwork, error) {
 	}
 	sort.Sort(Timeline(tl))
 	return tl, nil
+}
+
+// GetPublishedTimeline calls GetTimeline() and filters all artworks which
+// has a timestamp in the future. So just the published artworks are returned
+func (a *App) GetPublishedTimeline(filter string) ([]*Artwork, error) {
+	var publishedTimeline []*Artwork
+	tl, err := a.GetTimeline(filter)
+	if err != nil {
+		return publishedTimeline, err
+	}
+	now := time.Now()
+	loc, err := time.LoadLocation("Local")
+	for _, artw := range tl {
+		artwTime, err := time.ParseInLocation(TimeStampLayout, artw.Timestamp, loc)
+		if err != nil {
+			return publishedTimeline, errors.WithStack(err)
+		}
+		if now.After(artwTime) {
+			publishedTimeline = append(publishedTimeline, artw)
+		}
+	}
+	return publishedTimeline, nil
 }
 
 // AdminInstitutions returns all the intitutions, where the user is admin

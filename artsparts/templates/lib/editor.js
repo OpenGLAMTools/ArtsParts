@@ -31,6 +31,7 @@ $(document).ready(function () {
                     //$('#artworkedit').modal('hide')
                     // success callback
                     console.log("Artwork is safed");
+                    window.location.href = '/artwork' + URIPath;
                 }, response => {
                     // error callback
                      console.log("There was an error");

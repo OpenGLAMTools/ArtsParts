@@ -27,8 +27,10 @@ $(document).ready(function () {
                 $('#image').cropper('zoom', -0.25);
             },
             createArtpart: function () {
+                $('.ui.basic.modal').modal('show');
                 this.$http.post('/artpart' + URIPath, this.artpart).then(response => {
                     //$('#artworkedit').modal('hide')
+
                     // success callback
                     console.log("Artwork is safed");
                     window.location.href = '/artwork' + URIPath;

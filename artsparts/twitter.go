@@ -14,6 +14,7 @@ func initTwitter(conf Conf) {
 }
 
 func postPartTweet(ap *artsparts.Part, img image.Image, twitterAPI *anaconda.TwitterApi) error {
+	log.Infoln("-----postPartTweet----")
 	twitterID, mediaID, err := tweetImage(ap.Text, img, twitterAPI)
 	ap.TweetID = twitterID
 	ap.MediaID = mediaID
@@ -34,6 +35,7 @@ func tweetImage(text string, img image.Image, twitterAPI *anaconda.TwitterApi) (
 		"media_ids": []string{m.MediaIDString},
 	}
 	tweet, err := twitterAPI.PostTweet(text, v)
+	log.Infof("TweetImage: %#v\n", tweet)
 	twitterID = tweet.Id
 	return twitterID, mediaID, err
 

@@ -133,18 +133,16 @@ func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 // TweetNewArtworks checks if there is an artwork which is new inside the timeline
 func (app *ArtsPartsApp) TweetNewArtworks() {
 	ticker := time.Tick(time.Minute)
-	for now := range ticker {
+	for _ = range ticker {
 		tl, err := app.artsparts.GetPublishedTimeline("")
 		if err != nil {
 			log.Error("TweetNewArtwork: ", err)
 		}
 		for _, artw := range tl {
 			if artw.TweetID == 0 {
-				log.Info(artw)
 				go app.TweetArtwork(artw)
 			}
 		}
-		log.Info("Tick:", now)
 	}
 }
 
@@ -172,6 +170,7 @@ func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
 		log.Error("TweetArtwork: tweetImage: ", err)
 		return
 	}
+	log.Infoln("New Artwork. TweetID", twitterID)
 	artw.TweetID = twitterID
 	err = artw.WriteData()
 	if err != nil {

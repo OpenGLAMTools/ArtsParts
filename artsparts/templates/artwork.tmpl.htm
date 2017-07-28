@@ -11,6 +11,15 @@
         <div class="ui large image">
             <img id="image" src="/img{{.Artwork.URIPath}}?size=huge">
         </div>
+        <div class="ui hidden divider"></div>
+        <a href="/editor{{.Artwork.URIPath}}" class="ui right floated primary button">
+            ArtPart erstellen
+            <i class="right paint brush icon"></i>
+        </a>
+        <div class="ui hidden divider"></div>
+        <div>
+            {{.Artwork.Description}}
+        </div>
         
     </div>
     <div class="column">

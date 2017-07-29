@@ -158,11 +158,11 @@ func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
 		app.env["ACCESS_TOKEN_SECRET"],
 	)
 	twitterID, _, err := tweetImage(
-		fmt.Sprintf("%s %s Neues ArtPart Bild verfügbar. %s%s",
-			artw.InstitutionTwitter(),
-			artw.HashTag,
+		fmt.Sprintf("Neues ArtPart Bild verfügbar. %s%s by %s #ArtsParts %s",
 			app.conf.URL,
 			artw.ShortLink,
+			artw.InstitutionTwitter(),
+			artw.HashTag,
 		),
 		img,
 		twitterAPI)
@@ -397,9 +397,18 @@ func (app *ArtsPartsApp) artworkFromVars(vars map[string]string, w http.Response
 	collID := vars["collection"]
 	artwID := vars["artwork"]
 	artw, ok := app.artsparts.GetArtwork(instID, collID, artwID)
+
 	if !ok {
 		w.WriteHeader(404)
 		w.Write([]byte("Artwork not found"))
+	}
+	// reverse the order
+	if artw != nil && len(artw.Parts) > 0 {
+		var parts []*artsparts.Part
+		for i := range artw.Parts {
+			parts = append(parts, artw.Parts[len(artw.Parts)-i-1])
+		}
+		artw.Parts = parts
 	}
 	return artw
 }

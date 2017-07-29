@@ -4,7 +4,7 @@ $(document).ready(function () {
         el: '#editor',
         data: {
             artpart: {
-                tweettext: "http://artsparts.de"+PermanentLink+" #ArtsParts ",
+                tweettext: "http://artsparts.de"+PermanentLink+" #ArtsParts "+HashTag,
                 x: 0,
                 y: 0,
                 width: 0,

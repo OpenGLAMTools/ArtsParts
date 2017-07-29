@@ -82,6 +82,7 @@
 </div>
 <script>
 const URIPath = "{{js .Artwork.URIPath}}";
-const PermanentLink = "{{html .Artwork.ShortLink}}";
+const PermanentLink = "{{js .Artwork.ShortLink}}";
+const HashTag = "{{js .Artwork.HashTag}}";
 </script>
 {{ template "foot" .}} {{end}}

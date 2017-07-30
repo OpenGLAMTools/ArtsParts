@@ -13,6 +13,7 @@ type Conf struct {
 	URL           string            `yaml:"url"`
 	LogLevel      uint32            `yaml:"log_level"`
 	Env           map[string]string `yaml:"env"`
+	Pages         map[string]string `yaml:"pages"`
 }
 
 func loadConf(f string) (Conf, error) {

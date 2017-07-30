@@ -14,6 +14,7 @@ import (
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/disintegration/imaging"
 	"github.com/gorilla/mux"
+	"github.com/russross/blackfriday"
 )
 
 // ArtsPartsApp contains all the handlefuncs
@@ -101,6 +102,10 @@ func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, dat
 func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 	// Config the allowed pages here
 	allowedPages := []string{"admin"}
+	// add the pages from the conf
+	for k := range app.conf.Pages {
+		allowedPages = append(allowedPages, k)
+	}
 
 	data := app.defaultTemplateData(r)
 	page := data.Vars["page"]
@@ -115,6 +120,10 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 	case "admin":
 		data.AddJS("/lib/admin.js")
 		data.VueJS = true
+	default:
+		fmt.Println("..........", app.conf.Pages[page])
+		data.Vars["text"] = string(blackfriday.MarkdownCommon([]byte(app.conf.Pages[page])))
+		page = "page"
 	}
 	app.executeTemplate(w, page, data)
 }

@@ -24,6 +24,10 @@ func TestParseConf(t *testing.T) {
 			"ACCESS_TOKEN":        "ACCESS",
 			"ACCESS_TOKEN_SECRET": "ACCESS_SECRET",
 		},
+		map[string]string{
+			"Impressum":   "This is the impressum",
+			"AnotherPage": "This is another text",
+		},
 	}
 	if !reflect.DeepEqual(conf, exp) {
 		t.Error("Conf parsing is not correct", exp, conf)

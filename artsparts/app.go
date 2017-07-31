@@ -81,6 +81,9 @@ func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
 		dt, _ := formatTS(s, "02.01.2006 15:04")
 		return dt
 	}
+	funcMap["md"] = func(s string) template.HTML {
+		return template.HTML(blackfriday.MarkdownCommon([]byte(s)))
+	}
 	return funcMap
 }
 
@@ -121,8 +124,7 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 		data.AddJS("/lib/admin.js")
 		data.VueJS = true
 	default:
-		fmt.Println("..........", app.conf.Pages[page])
-		data.Vars["text"] = string(blackfriday.MarkdownCommon([]byte(app.conf.Pages[page])))
+		data.Vars["text"] = app.conf.Pages[page]
 		page = "page"
 	}
 	app.executeTemplate(w, page, data)

@@ -1,6 +1,8 @@
 package main
 
-import artsparts "github.com/OpenGLAMTools/ArtsParts"
+import (
+	artsparts "github.com/OpenGLAMTools/ArtsParts"
+)
 
 // TemplateData defines the default values for the templates
 type TemplateData struct {

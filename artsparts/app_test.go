@@ -24,7 +24,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 			"twitter": "user11",
 		}
 	}
-
+	pages, _ := loadPages(pagesFileName)
 	type args struct {
 		r *http.Request
 	}
@@ -46,6 +46,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 				Title:    "artsparts",
 				User:     "user1",
 				Vars:     map[string]string{},
+				Pages:    pages,
 				Admin:    true,
 				Session: map[string]string{
 					"twitter": "user1",
@@ -64,6 +65,7 @@ func Test_artsPartsApp_defaultTemplateData(t *testing.T) {
 				Title:    "artsparts",
 				User:     "user11",
 				Vars:     map[string]string{},
+				Pages:    pages,
 				Admin:    false,
 				Session: map[string]string{
 					"twitter": "user11",

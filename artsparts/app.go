@@ -17,6 +17,9 @@ import (
 	"github.com/russross/blackfriday"
 )
 
+// pagesFileName defines the file, where the static pages are defined.
+const pagesFileName = "pages.md"
+
 // ArtsPartsApp contains all the handlefuncs
 type ArtsPartsApp struct {
 	artsparts        *artsparts.App
@@ -54,6 +57,10 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 	if vars == nil {
 		vars = make(map[string]string)
 	}
+	pages, err := loadPages(pagesFileName)
+	if err != nil {
+		log.Error("defaultTemplateData: error loading pages ", err)
+	}
 	return &TemplateData{
 		JSFiles:  []string{"/lib/app.js"},
 		CSSFiles: []string{"/lib/custom.css"},
@@ -62,6 +69,7 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 		Title:    "artsparts",
 		User:     values["twitter"],
 		Vars:     vars,
+		Pages:    pages,
 		Admin:    isAdmin,
 		Session:  values,
 	}
@@ -82,7 +90,7 @@ func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
 		return dt
 	}
 	funcMap["md"] = func(s string) template.HTML {
-		return template.HTML(blackfriday.MarkdownCommon([]byte(s)))
+		return template.HTML(blackfriday.MarkdownBasic([]byte(s)))
 	}
 	return funcMap
 }
@@ -103,11 +111,15 @@ func (app *ArtsPartsApp) executeTemplate(w http.ResponseWriter, name string, dat
 // Page serves the templates direct. It is important to add a new template also
 // to the allowed pages variable.
 func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
+	pages, err := loadPages(pagesFileName)
+	if err != nil {
+		log.Error("app.Page() error loading pages: ", err)
+	}
 	// Config the allowed pages here
 	allowedPages := []string{"admin"}
 	// add the pages from the conf
-	for k := range app.conf.Pages {
-		allowedPages = append(allowedPages, k)
+	for _, p := range pages {
+		allowedPages = append(allowedPages, p.Path)
 	}
 
 	data := app.defaultTemplateData(r)
@@ -124,7 +136,10 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 		data.AddJS("/lib/admin.js")
 		data.VueJS = true
 	default:
-		data.Vars["text"] = app.conf.Pages[page]
+		thisPage := getPage(page, pages)
+		data.Title = fmt.Sprintf("%s - %s", data.Title, thisPage.Title)
+		data.Vars["title"] = thisPage.Title
+		data.Vars["text"] = thisPage.Text
 		page = "page"
 	}
 	app.executeTemplate(w, page, data)

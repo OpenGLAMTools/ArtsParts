@@ -1,7 +1,12 @@
 {{ define "page"}}
 {{ template "head" .}}
 <div class="ui container">
-{{md .Vars.text }}
+    <div class="ui grid">
+        <div class="seven wide column">
+        <h1>{{.Vars.title }}</h1>
+        {{md .Vars.text }}
+        </div>
+    </div>
 
 </div>
 {{ template "foot" .}}

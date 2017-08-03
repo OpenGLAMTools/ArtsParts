@@ -14,6 +14,7 @@ type TemplateData struct {
 	User     string
 	Admin    bool
 	Vars     map[string]string
+	Pages    []Page
 	Timeline []*artsparts.Artwork
 	Session  map[string]string
 }

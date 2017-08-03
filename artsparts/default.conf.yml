@@ -8,6 +8,3 @@ env:
   TWITTER_SECRET: SECRET123
   ACCESS_TOKEN: ACCESS
   ACCESS_TOKEN_SECRET: ACCESS_SECRET
-pages:
-  Impressum: "This is the impressum"
-  AnotherPage: "This is another text"

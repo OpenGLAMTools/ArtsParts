@@ -16,6 +16,7 @@ type TemplateData struct {
 	Vars     map[string]string
 	Pages    []Page
 	Timeline []*artsparts.Artwork
+	Pagenr   int
 	Session  map[string]string
 }
 

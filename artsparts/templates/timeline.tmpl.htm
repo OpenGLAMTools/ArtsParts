@@ -1,5 +1,6 @@
 {{ define "timeline"}}
 {{ template "head" .}}
+{{ $ := .}}
 <div class="ui stackable three column grid container">
     <div class="ui hidden divider"></div>
     <div class="row">
@@ -7,29 +8,27 @@
     </div>
 
     <div class="ui divided items">
-        {{range .Timeline}}
+        {{.Vars.page}}
+        {{range $index, $tl := .Timeline}}
+        {{if inPage $index $.Pagenr}}
         <div class="item">
             <div class="ui medium image">
-                <img src="/img{{.URIPath}}?size=medium" alt="{{.Name}}" />
+                <img src="/img{{$tl.URIPath}}?size=medium" alt="{{$tl.Name}}" />
             </div>
-
             <div class="middle aligned content">
-
-                <a href="/artwork{{.URIPath}}" class="header">{{.Name}}</a>
-
+                <a href="/artwork{{$tl.URIPath}}" class="header">{{$tl.Name}}</a>
                 <div class="meta">
-                    <div class="date">Ver&ouml;ffentlicht {{ tsToDateTime .Timestamp}}</div>
-
+                    <div class="date">Ver&ouml;ffentlicht {{ tsToDateTime $tl.Timestamp}}</div>
                 </div>
                 <div class="description">
-                    {{md .Description}}
+                    {{md $tl.Description}}
                 </div>
                 <div class="extra">
-                    <a href="/artwork{{.URIPath}}">
+                    <a href="/artwork{{$tl.URIPath}}">
                 <i class="twitter icon"></i>
-                {{len .Parts}} ArtPart Tweets
+                {{len $tl.Parts}} ArtPart Tweets
                 </a>
-                    <a href="/editor{{.URIPath}}" class="ui right floated primary button">
+                    <a href="/editor{{$tl.URIPath}}" class="ui right floated primary button">
                         ArtPart erstellen
                         <i class="right paint brush icon"></i>
                     </a>
@@ -37,6 +36,19 @@
             </div>
 
         </div>
+        {{end}}
+        {{end}}
+        {{if gt $.Pagenr 1}}
+        <a class="ui left labeled icon primary button" href="/?page={{add $.Pagenr -1}}">
+            <i class="left arrow icon"></i>
+            Prev
+        </a>
+        {{end}}
+        {{if pageExists (add $.Pagenr 1) (len .Timeline)}}
+        <a class="ui right labeled icon primary button" href="/?page={{add $.Pagenr 1}}">
+            <i class="right arrow icon"></i>
+            Next
+        </a>
         {{end}}
     </div>
 </div>

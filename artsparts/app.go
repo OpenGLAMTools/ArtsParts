@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/ChimeraCoder/anaconda"
@@ -92,6 +93,18 @@ func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
 	funcMap["md"] = func(s string) template.HTML {
 		return template.HTML(blackfriday.MarkdownBasic([]byte(s)))
 	}
+	funcMap["inPage"] = func(index, pagenr int) bool {
+		min := (pagenr - 1) * app.conf.ItemsPerPage
+		max := min + app.conf.ItemsPerPage
+		return min <= index && index < max
+	}
+	funcMap["pageExists"] = func(pagenr, items int) bool {
+		min := (pagenr - 1) * app.conf.ItemsPerPage
+		return min < items
+	}
+	funcMap["add"] = func(a, b int) int {
+		return a + b
+	}
 	return funcMap
 }
 
@@ -148,7 +161,13 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 // Timeline serves the homepage with timeline
 func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 	data := app.defaultTemplateData(r)
-	var err error
+	q := r.URL.Query()
+	pagenr, err := strconv.Atoi(q.Get("page"))
+	// If value can not be converted set page 1 as default
+	if err != nil {
+		pagenr = 1
+	}
+	data.Pagenr = pagenr
 	data.Timeline, err = app.artsparts.GetPublishedTimeline("")
 	if err != nil {
 		log.Error("app.timeline: error requesting timeline", err)

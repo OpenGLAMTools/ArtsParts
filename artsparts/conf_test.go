@@ -24,6 +24,7 @@ func TestParseConf(t *testing.T) {
 			"ACCESS_TOKEN":        "ACCESS",
 			"ACCESS_TOKEN_SECRET": "ACCESS_SECRET",
 		},
+		5,
 	}
 	if !reflect.DeepEqual(conf, exp) {
 		t.Error("Conf parsing is not correct", exp, conf)

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"image"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -247,12 +250,38 @@ func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("app.img() artw.ImgFile: ", err)
 	}
-	img, err := imaging.Open(filepath.Join(artw.Path(), imgFile))
+	fpath := filepath.Join(artw.Path(), imgFile)
+	img, err := getImageWithSize(fpath, size)
 	if err != nil {
 		w.WriteHeader(404)
 		w.Write([]byte("Can not load image"))
 		log.Error("can not load image file", err)
 		return
+	}
+	err = imaging.Encode(w, img, imaging.JPEG)
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("Can not encode image"))
+		log.Error("can not encode image", err)
+	}
+}
+
+func getImageWithSize(fpath, size string) (image.Image, error) {
+	cachePath := fmt.Sprintf("%s-%s", fpath, size)
+	sum := sha256.Sum256([]byte(cachePath))
+	cacheString := fmt.Sprintf("%x", sum)
+	cacheFile := filepath.Join(
+		"cache",
+		cacheString[:2],
+		cacheString,
+	)
+	if helpers.FileExists(cacheFile) {
+		return imaging.Open(cacheFile)
+	}
+
+	img, err := imaging.Open(fpath)
+	if err != nil {
+		return nil, err
 	}
 	switch size {
 	case "small":
@@ -266,12 +295,24 @@ func (app *ArtsPartsApp) Img(w http.ResponseWriter, r *http.Request) {
 	case "massive":
 		img = imaging.Fit(img, 960, 960, imaging.Lanczos)
 	}
-	err = imaging.Encode(w, img, imaging.JPEG)
+	// Write the fitted image into the cache
+	err = os.MkdirAll(
+		filepath.Dir(cacheFile),
+		0777,
+	)
 	if err != nil {
-		w.WriteHeader(404)
-		w.Write([]byte("Can not encode image"))
-		log.Error("can not encode image", err)
+		log.Error("error creating cache dir: ", err)
 	}
+	cf, err := os.Create(cacheFile)
+	defer cf.Close()
+	if err != nil {
+		log.Error("error creating cache file:", err)
+	}
+	err = imaging.Encode(cf, img, imaging.JPEG)
+	if err != nil {
+		log.Error("error writing cache file", err)
+	}
+	return img, nil
 }
 
 // Collection is the REST api for serving the Collection via json

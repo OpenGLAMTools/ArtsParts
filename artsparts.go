@@ -271,18 +271,20 @@ func (coll *Collection) GetArtwork(artwID string) (*Artwork, bool) {
 	return nil, false
 }
 
-// Part represends a part, which is tweeted from artsparts all coordinates
+// Part represents a part, which is tweeted from artsparts all coordinates
 // are relative to get the pixel the values have to be multiplied with
 // the image size. For example X * ImageWidth = Pixel for X
 type Part struct {
-	Text    string  `json:"tweettext"`
-	X       float64 `json:"x"`
-	Y       float64 `json:"y"`
-	Width   float64 `json:"width"`
-	Height  float64 `json:"height"`
-	User    string  `json:"user"`
-	TweetID int64   `json:"tweet_id,omitempty"`
-	MediaID int64   `json:"media_id,omitempty"`
+	Text          string  `json:"tweettext"`
+	X             float64 `json:"x"`
+	Y             float64 `json:"y"`
+	Width         float64 `json:"width"`
+	Height        float64 `json:"height"`
+	User          string  `json:"user"`
+	TweetID       int64   `json:"tweet_id,omitempty"`
+	TweetIDString string  `json:"tweet_id_str,omitempty"`
+	MediaID       int64   `json:"media_id,omitempty"`
+	MediaIDString string  `json:"media_id_str,omitempty"`
 }
 
 type Timeline []*Artwork
@@ -300,8 +302,8 @@ type TimelineItem struct {
 
 // User of the artsparts page. Everything about the user goes over
 // twitter. A twitter account and the authentication to the account
-// is compulsary to use artsparts.
-// The TwitterID is a unique number, which is normaly not known by
+// is compulsory to use artsparts.
+// The TwitterID is a unique number, which is normally not known by
 // the user. The TwitterName is the screen_name
 type User struct {
 	TwitterID   int64

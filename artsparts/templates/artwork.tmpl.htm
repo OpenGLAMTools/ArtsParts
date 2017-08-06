@@ -19,12 +19,13 @@
         <div class="ui hidden divider"></div>
         <div>
             {{md .Artwork.Description}}
+            <b>Lizenz: </b>{{md .Artwork.License }}
         </div>
         
     </div>
     <div class="column">
         {{range .Artwork.Parts}}
-           <div class="tweet" id="{{.TweetID}}"></div>
+           <div class="tweet" id="{{.TweetIDString}}"></div>
         {{end}}
     </div>
 </div>

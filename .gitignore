@@ -18,3 +18,4 @@
 .env
 artsparts/artsparts
 artsparts/cache/*
+.idea/*

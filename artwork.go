@@ -22,17 +22,18 @@ import (
 // Path contains the part of the url how the artwork can be found:
 // /[institution]/[collection]/[artwork]
 type Artwork struct {
-	Timestamp   string `json:"timestamp"`
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	TweetID     int64  `json:"tweet"`
-	HashTag     string `json:"hashtag"`
-	URIPath     string `json:"-"`
-	ShortLink   string `json:"shortlink"`
-	Parts       []*Part
-	fpath       string
-	collection  *Collection
+	Timestamp     string  `json:"timestamp"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	Description   string  `json:"description"`
+	TweetID       int64   `json:"tweet,omitempty"`
+	TweetIDString string  `json:"tweet_str,omitempty"`
+	HashTag       string  `json:"hashtag,omitempty"`
+	URIPath       string  `json:"-"`
+	ShortLink     string  `json:"shortlink,omitempty"`
+	Parts         []*Part `json:"Parts,omitempty"`
+	fpath         string
+	collection    *Collection
 }
 
 // NewArtwork loads an artwork configuration and return a pointer.
@@ -45,6 +46,7 @@ func NewArtwork(fpath string, coll *Collection) (*Artwork, error) {
 	b, err := ioutil.ReadFile(dataFilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
+			// file exists but another error occurs
 			return artw, err
 		}
 		// default values when data file is created
@@ -61,6 +63,11 @@ func NewArtwork(fpath string, coll *Collection) (*Artwork, error) {
 	artw.URIPath = fmt.Sprintf("/%s/%s/%s", coll.institution.ID, coll.ID, artw.ID)
 	artw.ShortLink, err = shortlink.GetShort("/artwork" + artw.URIPath)
 	return artw, err
+}
+
+// License returns the license of the collection. Method is used inside the templates
+func (a *Artwork) License() string {
+	return a.collection.License
 }
 
 // ImgFile return the filename of the image.

@@ -205,7 +205,7 @@ func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
 		app.env["ACCESS_TOKEN"],
 		app.env["ACCESS_TOKEN_SECRET"],
 	)
-	twitterID, _, err := tweetImage(
+	tweetResponse, err := tweetImage(
 		fmt.Sprintf("Neues ArtPart Bild verfügbar. %s%s by %s #ArtsParts %s",
 			app.conf.URL,
 			artw.ShortLink,
@@ -218,8 +218,9 @@ func (app *ArtsPartsApp) TweetArtwork(artw *artsparts.Artwork) {
 		log.Error("TweetArtwork: tweetImage: ", err)
 		return
 	}
-	log.Infoln("New Artwork. TweetID", twitterID)
-	artw.TweetID = twitterID
+	log.Infoln("New Artwork. TweetID", tweetResponse.twitterIDString)
+	artw.TweetID = tweetResponse.twitterID
+	artw.TweetIDString = tweetResponse.twitterIDString
 	err = artw.WriteData()
 	if err != nil {
 		log.Error("TweetArtwork: error writing data: ", err)

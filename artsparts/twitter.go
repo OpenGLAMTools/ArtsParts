@@ -13,30 +13,42 @@ func initTwitter(conf Conf) {
 	anaconda.SetConsumerSecret(conf.Env["TWITTER_SECRET"])
 }
 
+type tweetResponse struct {
+	twitterID       int64
+	twitterIDString string
+	mediaID         int64
+	mediaIDString   string
+}
+
 func postPartTweet(ap *artsparts.Part, img image.Image, twitterAPI *anaconda.TwitterApi) error {
 	log.Infoln("-----postPartTweet----")
-	twitterID, mediaID, err := tweetImage(ap.Text, img, twitterAPI)
-	ap.TweetID = twitterID
-	ap.MediaID = mediaID
+	resp, err := tweetImage(ap.Text, img, twitterAPI)
+	ap.TweetID = resp.twitterID
+	ap.TweetIDString = resp.twitterIDString
+	ap.MediaID = resp.mediaID
+	ap.MediaIDString = resp.mediaIDString
 	return err
 }
 
-func tweetImage(text string, img image.Image, twitterAPI *anaconda.TwitterApi) (twitterID, mediaID int64, err error) {
+func tweetImage(text string, img image.Image, twitterAPI *anaconda.TwitterApi) (tweetResponse, error) {
+	var resp tweetResponse
 	imgString, err := artsparts.ImageToBaseString(img)
 	if err != nil {
-		return twitterID, mediaID, err
+		return resp, err
 	}
 	m, err := twitterAPI.UploadMedia(imgString)
 	if err != nil {
-		return twitterID, mediaID, err
+		return resp, err
 	}
-	mediaID = m.MediaID
+	resp.mediaID = m.MediaID
+	resp.mediaIDString = m.MediaIDString
 	v := url.Values{
 		"media_ids": []string{m.MediaIDString},
 	}
 	tweet, err := twitterAPI.PostTweet(text, v)
 	log.Infof("TweetImage: %#v\n", tweet)
-	twitterID = tweet.Id
-	return twitterID, mediaID, err
+	resp.twitterID = tweet.Id
+	resp.twitterIDString = tweet.IdStr
+	return resp, err
 
 }

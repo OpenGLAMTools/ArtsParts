@@ -7,7 +7,9 @@ const Artwork = Vue.component('Artwork', {
   </div>
   <div class="image content">
     <div class="ui medium image">
-      <img :src=imagepath />
+    
+      <img :src=imagepathhuge />
+    
     </div>
     <div class="description">
     <p>Edit the data to that artwork. Be sure to save your changes.</p  >
@@ -50,8 +52,11 @@ const Artwork = Vue.component('Artwork', {
     }
   },
   computed:{
-    imagepath: function(){
+    imagepathmedium: function(){
       return '/img/'+this.iid+'/'+this.cid+'/'+this.artwork.id+"?size=medium";
+    },
+    imagepathhuge: function(){
+      return '/img/'+this.iid+'/'+this.cid+'/'+this.artwork.id+"?size=massive";
     }
   },
   methods: {

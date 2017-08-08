@@ -41,14 +41,15 @@
                 <div class="header">Achtung nicht angemeldet!</div>
                 <ul class="list">
                     <li>Um einen ArtPart tweeten zu k&ouml;nnen, musst Du mit Deinem Twitter account angemeldet sein.</li>
-                    <li>Klicke oben rechts auf "Mit Twitter anmelden"</li>
-                    <li>Ansonsten kannst Du hier schon mal ausprobieren, wie das hier funktioniert.</li>
+                    <li>Klicke auf "Mit Twitter anmelden" um weiter zu machen</li>
                 </ul>
             </div>
         </div>
         {{end}}
         <div class="ui hidden divider"></div>
         <div class="ui form">
+            
+            {{ with .User}}
             <div class="field">
                 <label>Dein ArtPart Tweet</label>
                 <textarea v-model="artpart.tweettext" rows="2"></textarea>
@@ -61,7 +62,6 @@
                     <p>Achtung zu viele Zeichen verwendet. Dein Tweet wird nach 140 Zeichen automatisch abgeschnitten!</p>
                 </div>
             </div>
-            {{ with .User}}
             <button class="ui left labeled icon button">
             <i class="remove circle icon"></i>
             Abbrechen
@@ -76,6 +76,11 @@
                     Dein ArtPart Tweet wird gepostet.
                 </div>
             </div>
+            {{else}}
+            <a  href="/auth/twitter" class="ui right labeled icon primary button">
+            <i class="twitter icon"></i>
+            Mit Twitter anmelden
+            </a>
             {{end}}
         </div>
     </div>

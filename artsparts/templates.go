@@ -6,18 +6,19 @@ import (
 
 // TemplateData defines the default values for the templates
 type TemplateData struct {
-	JSFiles  []string
-	CSSFiles []string
-	JQuery   bool
-	VueJS    bool
-	Title    string
-	User     string
-	Admin    bool
-	Vars     map[string]string
-	Pages    []Page
-	Timeline []*artsparts.Artwork
-	Pagenr   int
-	Session  map[string]string
+	JSFiles   []string
+	CSSFiles  []string
+	JQuery    bool
+	VueJS     bool
+	Title     string
+	User      string
+	Admin     bool
+	Vars      map[string]string
+	Pages     []Page
+	Artsparts *artsparts.App
+	Timeline  []*artsparts.Artwork
+	Pagenr    int
+	Session   map[string]string
 }
 
 // AddJS adds a string to the JSFiles

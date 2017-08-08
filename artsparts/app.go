@@ -66,16 +66,17 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 		log.Error("defaultTemplateData: error loading pages ", err)
 	}
 	return &TemplateData{
-		JSFiles:  []string{"/lib/app.js"},
-		CSSFiles: []string{"/lib/custom.css"},
-		JQuery:   true,
-		VueJS:    false,
-		Title:    "artsparts",
-		User:     values["twitter"],
-		Vars:     vars,
-		Pages:    pages,
-		Admin:    isAdmin,
-		Session:  values,
+		JSFiles:   []string{"/lib/app.js"},
+		CSSFiles:  []string{"/lib/custom.css"},
+		JQuery:    true,
+		VueJS:     false,
+		Title:     "",
+		User:      values["twitter"],
+		Vars:      vars,
+		Pages:     pages,
+		Artsparts: app.artsparts,
+		Admin:     isAdmin,
+		Session:   values,
 	}
 }
 func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {
@@ -153,7 +154,7 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 		data.VueJS = true
 	default:
 		thisPage := getPage(page, pages)
-		data.Title = fmt.Sprintf("%s - %s", data.Title, thisPage.Title)
+		data.Title = thisPage.Title
 		data.Vars["title"] = thisPage.Title
 		data.Vars["text"] = thisPage.Text
 		page = "page"
@@ -164,6 +165,28 @@ func (app *ArtsPartsApp) Page(w http.ResponseWriter, r *http.Request) {
 // Timeline serves the homepage with timeline
 func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 	data := app.defaultTemplateData(r)
+	data.Title = "Timeline alle Sammlungen"
+	filter := ""
+	institution, ok := data.Vars["institution"]
+	if ok {
+		filter = fmt.Sprintf("/%s/*", institution)
+		inst, ok := app.artsparts.GetInstitution(institution)
+		if !ok {
+			w.WriteHeader(404)
+			return
+		}
+		data.Title = fmt.Sprintf("Timeline - %s", inst.Name)
+		collection, ok := data.Vars["collection"]
+		if ok {
+			coll, ok := app.artsparts.GetCollection(institution, collection)
+			if !ok {
+				w.WriteHeader(404)
+				return
+			}
+			filter = fmt.Sprintf("/%s/%s/*", institution, collection)
+			data.Title = fmt.Sprintf("Timeline - %s by %s", coll.Name, inst.Name)
+		}
+	}
 	q := r.URL.Query()
 	pagenr, err := strconv.Atoi(q.Get("page"))
 	// If value can not be converted set page 1 as default
@@ -171,7 +194,8 @@ func (app *ArtsPartsApp) Timeline(w http.ResponseWriter, r *http.Request) {
 		pagenr = 1
 	}
 	data.Pagenr = pagenr
-	data.Timeline, err = app.artsparts.GetPublishedTimeline("")
+	data.Timeline, err = app.artsparts.GetPublishedTimeline(filter)
+
 	if err != nil {
 		log.Error("app.timeline: error requesting timeline", err)
 	}
@@ -368,6 +392,7 @@ func (app *ArtsPartsApp) Editor(w http.ResponseWriter, r *http.Request) {
 	// enable vuejs here
 	data.VueJS = true
 	artw := app.artworkFromVars(data.Vars, w)
+	data.Title = fmt.Sprintf("Editor: %s", artw.Name)
 	tmplData := struct {
 		*TemplateData
 		Artwork *artsparts.Artwork
@@ -429,6 +454,7 @@ func (app *ArtsPartsApp) ArtworkPage(w http.ResponseWriter, r *http.Request) {
 	//data.AddJS("https://platform.twitter.com/widgets.js")
 	data.AddJS("/lib/artwork.js")
 	artw := app.artworkFromVars(data.Vars, w)
+	data.Title = artw.Name
 	tmplData := struct {
 		*TemplateData
 		Artwork *artsparts.Artwork

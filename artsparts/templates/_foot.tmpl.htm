@@ -14,7 +14,24 @@
        
         <div class="seven wide column">
           <h4 class="ui inverted header">Collections</h4>
-          <p>Eine Liste der mitmachenden Organisationen</p>
+          <p>Eine Liste aller vorhandenen Sammlungen:</p>
+          <div class="ui list">
+            {{range .Artsparts.Institutions}}
+            {{$inst := .}}
+              <div class="item">
+                <div class="content">
+                  <a class="header" href="/tl/{{$inst.ID}}">{{.Name}}</a>
+                  <div class="description">
+                    <div class="ui list">
+                    {{range .Collections}}
+                      <a class="item"  href="/tl/{{$inst.ID}}/{{.ID}}">{{.Name}}</a>
+                    {{end}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {{end}}
+          </div>
         </div>
       </div>
     </div>

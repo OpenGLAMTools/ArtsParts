@@ -99,8 +99,7 @@ func (a *App) GetTimeline(filter string) ([]*Artwork, error) {
 		for _, coll := range inst.Collections {
 
 			for _, artw := range coll.Artworks {
-				p := fmt.Sprintf("/%s/%s/%s", inst.Name, coll.Name, artw.Name)
-
+				p := fmt.Sprintf("/%s/%s/%s", inst.ID, coll.ID, artw.ID)
 				match, err := regexp.MatchString(filter, p)
 				if err != nil {
 					return tl, errors.WithStack(err)

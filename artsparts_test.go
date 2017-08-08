@@ -30,6 +30,13 @@ func TestApp_GetTimeline(t *testing.T) {
 			false,
 		},
 		{
+			"find all artworks",
+			app,
+			args{"/inst1/*"},
+			[]*Artwork{pic1, pic2},
+			false,
+		},
+		{
 			"find one artworks",
 			app,
 			args{"/*/pic2"},

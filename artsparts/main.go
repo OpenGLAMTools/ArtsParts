@@ -56,6 +56,8 @@ func main() {
 func addAppRoutes(r *mux.Router, app *ArtsPartsApp) *mux.Router {
 
 	r.HandleFunc("/", app.Timeline)
+	r.HandleFunc("/tl/{institution}", app.Timeline)
+	r.HandleFunc("/tl/{institution}/{collection}", app.Timeline)
 	r.HandleFunc("/page/{page}", app.Page)
 	r.HandleFunc("/data/admin", app.AdminInstitutions).Methods("GET")
 	r.HandleFunc("/data/{institution}/{collection}/{artwork}", app.ArtworkData).Methods("GET", "POST")

@@ -1,6 +1,27 @@
 {{ define "nav"}}
 <div id="topnav" class="ui blue top fixed inverted menu">
   <a href="/" class="header item"><img class="ui mini image" src="/lib/logo_mini.png" alt="ArtsParts logo"> &nbsp;ArtsParts</a>
+  <div class="ui pointing dropdown item"><span class="text">Infos</span>
+    <i class="dropdown icon"></i>
+    <div class="menu">
+      {{range $p := .Pages}}
+            <a href="/page/{{$p.Path}}" class="item">{{$p.Title}}</a>
+      {{end}}
+    </div>
+  </div>
+  <div class="ui pointing dropdown item"><span class="text">Samlungen</span>
+    <i class="dropdown icon"></i>
+    <div class="menu">
+       {{range .Artsparts.Institutions}}
+        {{$inst := .}}
+          <div class="header">{{.Name}}</div>
+          {{range .Collections}}
+                <a class="item"  href="/tl/{{$inst.ID}}/{{.ID}}">{{.Name}}</a>
+          {{end}}
+          <div class="divider"></div>
+        {{end}}
+    </div>
+  </div>
   
   <div class="right menu">
       {{ with .Admin }}

@@ -309,6 +309,10 @@ func getImageWithSize(fpath, size string) (image.Image, error) {
 		return nil, err
 	}
 	switch size {
+	case "mini":
+		img = imaging.Fit(img, 35, 35, imaging.Lanczos)
+	case "tiny":
+		img = imaging.Fit(img, 80, 80, imaging.Lanczos)
 	case "small":
 		img = imaging.Fit(img, 150, 150, imaging.Lanczos)
 	case "medium":

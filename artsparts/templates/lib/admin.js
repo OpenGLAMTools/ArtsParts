@@ -88,8 +88,10 @@ const Collection = Vue.component('Collection', {
   <tbody>
   <tr v-for="(a,i) in institution.collections[cid].artworks">
   <td v-on:click="modal"><router-link 
-          
-        :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.id}}</router-link></td>
+        :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.id}}<br>
+        <img :src=imgPath(a.id)>
+        </router-link>
+        </td>
 <td v-on:click="modal"><router-link 
         
         :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.name}}</router-link></td>
@@ -112,6 +114,9 @@ const Collection = Vue.component('Collection', {
   methods: {
     modal: function(){
        $('.ui.modal').modal('show');
+    },
+    imgPath: function(aid){
+      return "/img/"+this.iid+"/"+this.cid+"/"+aid+"?size=small";
     }
   },
   props: ['institution', 'iid', 'cid']

@@ -1,5 +1,5 @@
 {{ define "nav"}}
-<div id="topnav" class="ui blue top fixed inverted menu">
+<div id="topnav" class="ui blue top stackable inverted menu">
   <a href="/" class="header item"><img class="ui mini image" src="/lib/logo_mini.png" alt="ArtsParts logo"> &nbsp;ArtsParts</a>
   <div class="ui pointing dropdown item"><span class="text">Infos</span>
     <i class="dropdown icon"></i>
@@ -23,12 +23,17 @@
     </div>
   </div>
   
-  <div class="right menu">
+
       {{ with .Admin }}
       <a href="/page/admin" class="item">Admin</a>
       {{ end }}
-    {{ template "login" .}}
-  </div>
+      {{with .User}}
+        <a href="/auth/twitter/logout" class="item right">
+         <i class="twitter icon" ></i> @{{.}} abmelden
+        </a>{{else}}
+        <a href="/auth/twitter" class="item right"><i class="twitter icon" ></i>Mit Twitter anmelden</a>
+      {{end}}
+
 </div>
 <div class="ui hidden divider"></div>
 {{ end }}

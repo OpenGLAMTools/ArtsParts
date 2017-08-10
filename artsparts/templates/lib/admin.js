@@ -96,7 +96,8 @@ const Collection = Vue.component('Collection', {
         
         :to="{name: 'artwork', params:{iid:iid, cid:cid, aindex:i}}">{{a.name}}</router-link></td>
 <td>{{a.description}}</td>
-<td>{{a.timestamp}}</td>                        
+<td>{{renderTS(a.timestamp)}}
+</td>                        
   </tr>
   </tbody>
   </table>
@@ -117,6 +118,9 @@ const Collection = Vue.component('Collection', {
     },
     imgPath: function(aid){
       return "/img/"+this.iid+"/"+this.cid+"/"+aid+"?size=small";
+    },
+    renderTS: function(ts){
+      return ts.substr(6,2)+"."+ts.substr(4,2)+"."+ts.substr(0,4)+" "+ts.substr(8,2)+":"+ts.substr(10,2)
     }
   },
   props: ['institution', 'iid', 'cid']

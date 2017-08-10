@@ -140,7 +140,7 @@ func (a *App) GetPublishedTimeline(filter string) ([]*Artwork, error) {
 	return publishedTimeline, nil
 }
 
-// AdminInstitutions returns all the intitutions, where the user is admin
+// AdminInstitutions returns all the institutions, where the user is admin
 func (a *App) AdminInstitutions(userName string) Institutions {
 	ins := []*Institution{}
 	for _, i := range a.Institutions {
@@ -255,6 +255,7 @@ func NewCollection(fpath string, inst *Institution) (*Collection, error) {
 		}
 		coll.Artworks = append(coll.Artworks, artw)
 	}
+	sort.Sort(Timeline(coll.Artworks))
 	return coll, nil
 }
 

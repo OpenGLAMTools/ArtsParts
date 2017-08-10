@@ -145,6 +145,7 @@ func (a *App) AdminInstitutions(userName string) Institutions {
 	ins := []*Institution{}
 	for _, i := range a.Institutions {
 		if helpers.StringInSlice(userName, i.Admins) {
+			i.SortArtworks()
 			ins = append(ins, i)
 		}
 	}
@@ -210,6 +211,13 @@ func NewInstitution(fpath string) (*Institution, error) {
 		inst.Collections[coll.ID] = coll
 	}
 	return inst, nil
+}
+
+// SortArtworks ranges over all collections and sorts the artworks
+func (ins *Institution) SortArtworks() {
+	for _, coll := range ins.Collections {
+		sort.Sort(Timeline(coll.Artworks))
+	}
 }
 
 // Collection represents a group of artworks, which are presented

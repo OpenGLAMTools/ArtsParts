@@ -1,0 +1,22 @@
+{{ define "meta" }}
+<div class="ui list">
+    {{with .Artist}}
+        <div class="item">
+            <div class="header">K&uuml;nstler: </div>
+            {{md .}}
+        </div>  
+    {{ end}}
+    {{with .Date}}
+        <div class="item">
+            <div class="header">Datum: </div>
+            {{md .}}
+        </div>  
+    {{ end}}
+    {{with .Link}}
+        <div class="item">
+            <div class="header">Link: </div>
+            <a href="{{.}}">{{.}}</a>
+        </div>  
+    {{ end}}
+</div>    
+{{ end }}

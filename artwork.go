@@ -22,18 +22,25 @@ import (
 // Path contains the part of the url how the artwork can be found:
 // /[institution]/[collection]/[artwork]
 type Artwork struct {
-	Timestamp     string  `json:"timestamp"`
-	ID            string  `json:"id"`
-	Name          string  `json:"name"`
-	Description   string  `json:"description"`
-	TweetID       int64   `json:"tweet,omitempty"`
-	TweetIDString string  `json:"tweet_str,omitempty"`
-	HashTag       string  `json:"hashtag,omitempty"`
-	URIPath       string  `json:"-"`
-	ShortLink     string  `json:"shortlink,omitempty"`
-	Parts         []*Part `json:"Parts,omitempty"`
+	Timestamp     string   `json:"timestamp"`
+	ID            string   `json:"id"`
+	Name          string   `json:"name"`
+	Description   string   `json:"description"`
+	TweetID       int64    `json:"tweet,omitempty"`
+	TweetIDString string   `json:"tweet_str,omitempty"`
+	HashTag       string   `json:"hashtag,omitempty"`
+	URIPath       string   `json:"-"`
+	ShortLink     string   `json:"shortlink,omitempty"`
+	Parts         []*Part  `json:"Parts,omitempty"`
+	Meta          MetaData `json:"meta"`
 	fpath         string
 	collection    *Collection
+}
+
+type MetaData struct {
+	Artist string `json:"artist"`
+	Date   string `json:"date"`
+	Link   string `json:"link"`
 }
 
 // NewArtwork loads an artwork configuration and return a pointer.

@@ -19,6 +19,7 @@
         <div class="ui hidden divider"></div>
         <div>
             {{md .Artwork.Description}}
+            {{template "meta" .Artwork.Meta}}
             <b>Lizenz: </b>{{md .Artwork.License }}
         </div>
         

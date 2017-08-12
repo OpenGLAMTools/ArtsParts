@@ -26,6 +26,10 @@ const Artwork = Vue.component('Artwork', {
             <label for="HashTag">HashTag</label>
             <input  class="form-control" id="HashTag"  v-model="artwork.hashtag">
           </div>
+          <div class="field" v-for="d in meta">
+            <label :for=d>{{d}}</label>
+            <input  class="form-control" :id="d"  v-model="artwork.meta[d]">
+          </div>
           <div class="field">
             <label for="Desc">Description</label>
             <textarea id="Desc" class="form-control" rows="5" v-model="artwork.description"></textarea>
@@ -48,7 +52,8 @@ const Artwork = Vue.component('Artwork', {
   `,
   data: function(){
     return {
-      artwork: this.collection.artworks[this.aindex]
+      artwork: this.collection.artworks[this.aindex],
+      meta : ['artist','date','link']
     }
   },
   computed:{

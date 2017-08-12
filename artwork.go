@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"github.com/OpenGLAMTools/ArtsParts/helpers"
 	"github.com/OpenGLAMTools/ArtsParts/shortlink"
@@ -22,17 +23,17 @@ import (
 // Path contains the part of the url how the artwork can be found:
 // /[institution]/[collection]/[artwork]
 type Artwork struct {
-	Timestamp     string   `json:"timestamp"`
+	Timestamp     string   `json:"timestamp" artw:"admin"`
 	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Description   string   `json:"description"`
+	Name          string   `json:"name" artw:"admin"`
+	Description   string   `json:"description" artw:"admin"`
 	TweetID       int64    `json:"tweet,omitempty"`
 	TweetIDString string   `json:"tweet_str,omitempty"`
-	HashTag       string   `json:"hashtag,omitempty"`
+	HashTag       string   `json:"hashtag,omitempty" artw:"admin"`
 	URIPath       string   `json:"-"`
 	ShortLink     string   `json:"shortlink,omitempty"`
 	Parts         []*Part  `json:"Parts,omitempty"`
-	Meta          MetaData `json:"meta"`
+	Meta          MetaData `json:"meta" artw:"admin"`
 	fpath         string
 	collection    *Collection
 }
@@ -162,4 +163,16 @@ func (artw *Artwork) IsAdminUser(userName string) bool {
 
 func (artw *Artwork) dataFilePath() string {
 	return filepath.Join(artw.fpath, DataFileName)
+}
+
+func CopyArtwork(dst, src *Artwork, tagval string) {
+	va := reflect.ValueOf(dst).Elem()
+	vb := reflect.ValueOf(src).Elem()
+	ta := reflect.TypeOf(*dst)
+	for i := 0; i < va.NumField(); i++ {
+		t := ta.Field(i)
+		if t.Tag.Get("artw") == tagval {
+			va.Field(i).Set(vb.Field(i))
+		}
+	}
 }

@@ -1,8 +1,6 @@
 package artsparts
 
 import (
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -205,76 +203,6 @@ func TestCollection_GetArtwork(t *testing.T) {
 	}
 }
 
-func TestNewArtworkEnsureConf(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "artsparts_test")
-	defer os.RemoveAll(tmpDir)
-	if err != nil {
-		t.Error("can not create tmp dir:", err)
-	}
-	artw, err := NewArtwork(tmpDir, nil)
-	if err != nil {
-		t.Error("error creating artwork:", err)
-	}
-	filename := artw.dataFilePath()
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		t.Error("data file does not exist")
-	}
-}
-
-func TestArtworkPath(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "artsparts_test")
-	defer os.RemoveAll(tmpDir)
-	if err != nil {
-		t.Error("can not create tmp dir:", err)
-	}
-	artw, err := NewArtwork(tmpDir, nil)
-	if err != nil {
-		t.Error("error creating artwork:", err)
-	}
-	if artw.Path() != tmpDir {
-		t.Error("Artwork need to return the path")
-	}
-}
-
-func TestArtworkImgFile(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "artsparts_test")
-	if err != nil {
-		t.Error("can not create tmp dir:", err)
-	}
-	defer os.RemoveAll(tmpDir)
-	b := []byte{}
-	ioutil.WriteFile(filepath.Join(tmpDir, "f1.txt"), b, 0777)
-	ioutil.WriteFile(filepath.Join(tmpDir, "img.jpg"), b, 0777)
-	artw, err := NewArtwork(tmpDir, nil)
-	if err != nil {
-		t.Error("error creating artwork:", err)
-	}
-	imgFile, err := artw.ImgFile()
-	if err != nil {
-		t.Error(err)
-	}
-	if imgFile != "img.jpg" {
-		t.Error("Expect img.jpg got:", imgFile)
-	}
-}
-
-func TestArtworkIsAdminUser(t *testing.T) {
-	app, _ := NewApp(filepath.Join("test"))
-	artw, _ := app.GetArtwork("inst1", "coll1", "pic1")
-	tests := []struct {
-		user   string
-		expect bool
-	}{
-		{"user1", true},
-		{"abc", false},
-	}
-	for _, tt := range tests {
-		got := artw.IsAdminUser(tt.user)
-		if got != tt.expect {
-			t.Errorf("IsAdminUser returns wrong value\nInput:%s\nExp: %v  Got: %v", tt.user, tt.expect, got)
-		}
-	}
-}
 func Test_loadConf(t *testing.T) {
 	type args struct {
 		filePath string

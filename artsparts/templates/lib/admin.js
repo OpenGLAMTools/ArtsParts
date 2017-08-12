@@ -23,10 +23,6 @@ const Artwork = Vue.component('Artwork', {
             <input  class="form-control" id="Timestamp" placeholder="YYYYMMDDHHMM" v-model="artwork.timestamp">
           </div>
           <div class="field">
-          <label for="t">t</label>
-          <input  class="form-control" id="t" placeholder="YYYYMMDDHHMM" v-model="artwork.shortlink">
-        </div>
-          <div class="field">
             <label for="HashTag">HashTag</label>
             <input  class="form-control" id="HashTag"  v-model="artwork.hashtag">
           </div>

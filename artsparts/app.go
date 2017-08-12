@@ -469,7 +469,10 @@ func (app *ArtsPartsApp) ArtworkPage(w http.ResponseWriter, r *http.Request) {
 	app.executeTemplate(w, "artwork", tmplData)
 }
 
-// Artwork is the REST api for the AdminInstitution app
+// ArtworkData is the REST api for the AdminInstitution app
+// Security isssue when a POST request is send.
+// Not all data is allowed to be changed over the POST request. Just the data
+// which the admin can change
 func (app *ArtsPartsApp) ArtworkData(w http.ResponseWriter, r *http.Request) {
 	// path:
 	// /data/{institution}/{collection}/{artwork}
@@ -489,11 +492,13 @@ func (app *ArtsPartsApp) ArtworkData(w http.ResponseWriter, r *http.Request) {
 			log.Error("artwork: error reading from body", err)
 			return
 		}
-		err = json.Unmarshal(rbody, artw)
+		newData := &artsparts.Artwork{}
+		err = json.Unmarshal(rbody, newData)
 		if err != nil {
 			log.Error("artwork: error unmarshaling body", err)
 			return
 		}
+		artsparts.CopyArtwork(artw, newData, "admin")
 		err = artw.WriteData()
 		if err != nil {
 			log.Error("artwork: error writing data", err)
@@ -506,7 +511,6 @@ func (app *ArtsPartsApp) ArtworkData(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(b)
 	}
-
 }
 
 func (app *ArtsPartsApp) artworkFromVars(vars map[string]string, w http.ResponseWriter) *artsparts.Artwork {

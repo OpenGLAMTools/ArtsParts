@@ -2,5 +2,12 @@
    "timestamp": "201708011155",
    "id": "pic1",
    "name": "First Picture",
-   "description": ""
+   "description": "Description",
+   "tweet_str": "pic1",
+   "shortlink": "/s/1",
+   "meta": {
+        "artist": "Artistval",
+        "date": "Dateval",
+        "link": "http://test.com"
+    }
 }

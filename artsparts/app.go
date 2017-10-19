@@ -65,18 +65,20 @@ func (app *ArtsPartsApp) defaultTemplateData(r *http.Request) *TemplateData {
 	if err != nil {
 		log.Error("defaultTemplateData: error loading pages ", err)
 	}
+
 	return &TemplateData{
-		JSFiles:   []string{"/lib/app.js"},
-		CSSFiles:  []string{"/lib/custom.css"},
-		JQuery:    true,
-		VueJS:     false,
-		Title:     "",
-		User:      values["twitter"],
-		Vars:      vars,
-		Pages:     pages,
-		Artsparts: app.artsparts,
-		Admin:     isAdmin,
-		Session:   values,
+		JSFiles:         []string{"/lib/app.js"},
+		CSSFiles:        []string{"/lib/custom.css"},
+		GoogleAnalytics: app.env["GOOGLE_ANALYTICS"],
+		JQuery:          true,
+		VueJS:           false,
+		Title:           "",
+		User:            values["twitter"],
+		Vars:            vars,
+		Pages:           pages,
+		Artsparts:       app.artsparts,
+		Admin:           isAdmin,
+		Session:         values,
 	}
 }
 func (app *ArtsPartsApp) defaultFuncMap() template.FuncMap {

@@ -39,13 +39,13 @@
         {{end}}
         {{end}}
         {{if gt $.Pagenr 1}}
-        <a class="ui left labeled icon primary button" href="/?page={{add $.Pagenr -1}}">
+        <a class="ui left labeled icon primary button" href="?page={{add $.Pagenr -1}}">
             <i class="left arrow icon"></i>
             Prev
         </a>
         {{end}}
         {{if pageExists (add $.Pagenr 1) (len .Timeline)}}
-        <a class="ui right labeled icon primary button" href="/?page={{add $.Pagenr 1}}">
+        <a class="ui right labeled icon primary button" href="?page={{add $.Pagenr 1}}">
             <i class="right arrow icon"></i>
             Next
         </a>

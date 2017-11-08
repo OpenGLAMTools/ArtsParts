@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    var MAXCHARS = 280 
     var app = new Vue({
         delimiters: ['[[', ']]'],
         el: '#editor',
@@ -13,10 +14,10 @@ $(document).ready(function () {
         },
         computed: {
             charsRemain: function () {
-                return 140 - this.artpart.tweettext.length
+                return MAXCHARS - this.artpart.tweettext.length
             },
             tooMuchChars: function () {
-                return (140 < this.artpart.tweettext.length)
+                return (MAXCHARS < this.artpart.tweettext.length)
             }
         },
         methods: {
